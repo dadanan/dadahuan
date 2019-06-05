@@ -2,290 +2,207 @@
   <div class="dashboard-container">
     <el-card>
       <div class="table-opts">
+        <el-form :inline="true" class="el-form--flex">
+          <el-form-item>
+            <el-input placeholder="请输入搜索ID" v-model="query.id"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-input placeholder="请输入搜索型号" v-model="query.modelName"></el-input>
+          </el-form-item>
+         <el-form-item>
+            <el-input placeholder="请输入搜索场地" v-model="query.groundName"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-input placeholder="请输入搜索MAC" v-model="query.deviceNo"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" icon="el-icon-search" @click="list">搜索</el-button>
+            <el-button @click="reset">重置</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div class="table-opts">
         <el-button-group>
-          <el-button type="primary" v-if='isPro()' @click="deviceImportDialogVisible = true">导入</el-button>
-          <el-button type="primary" v-if='isPro()' @click="deviceAddDialogVisible = true">添加</el-button>
-          <el-button type="primary" v-if='isPro()' @click="deleteOneDeviceHandler">删除</el-button>
-          <el-button type="primary" v-if='isPro()' @click='handleDeviceRecover'>恢复</el-button>
-          <el-button type="primary" @click="handleDeviceAllocate">分配</el-button>
-          <el-button type="primary" @click="handleDeviceFree">召回</el-button>
-          <el-button type="primary" @click="handleDeviceDisable">禁用</el-button>
-          <el-button type="primary" @click="handleDeviceAble">启用</el-button>
-          <el-button type="primary" @click="handleDeviceCluster">创建项目</el-button>
-          <el-button type="primary" @click="handleDeviceBind">绑定</el-button>
-          <el-button type="primary" @click="handleDeviceUnbind">解绑</el-button>
-          <el-button type="primary" @click="deviceExportDialogVisible = true">导出</el-button>
-          <el-button type="primary" @click="deviceColumnControlDialogVisible = true">自定义</el-button>
+          <el-button type="primary" @click="deviceImportDialogVisible = true">导入</el-button>
+          <el-button type="primary" @click="deviceAddDialogVisible = true">添加</el-button>
+          <el-button type="primary" @click="handleDeviceDisable">激活</el-button>
+          <el-button type="primary" @click='handleDeviceRecover'>分配</el-button>
+          <el-button type="primary" @click="handleDeviceFree">取消激活</el-button>
+          <el-button type="primary" @click="deleteOneDeviceHandler">删除</el-button>
+          <!-- <el-button type="primary" @click="deviceExportDialogVisible = true">导出</el-button> -->
+          <!-- <el-button type="primary" @click="deviceColumnControlDialogVisible = true">自定义</el-button> -->
         </el-button-group>
       </div>
-      <el-table @expand-change="expandChanged" :data="computeDeviceList" style="width: 100%" @selection-change="handleSelectionChange" class="mb20" border>
-        <el-table-column type="expand">
-          <template slot-scope="scope">
-            <el-table v-if='scope.row.childCount!==0' :data="scope.row.childDeviceList" style="width: 100%" class="mb20" border>
-              <el-table-column type="index"></el-table-column>
-              <el-table-column prop="name" label="从设备名称" show-overflow-tooltip sortable v-if="deviceColumnVisible.name">
-              </el-table-column>
-              <el-table-column prop="childId" label="从设备ID" show-overflow-tooltip sortable v-if="deviceColumnVisible.mac">
-              </el-table-column>
-              <el-table-column label="分配状态" show-overflow-tooltip sortable v-if="deviceColumnVisible.assignStatus">
-                <template slot-scope="scope">
-                  {{scope.row.assignStatus === 1 ? '已分配' : '未分配'}}
-                </template>
-              </el-table-column>
-              <el-table-column label="绑定状态" show-overflow-tooltip sortable v-if="deviceColumnVisible.bindStatus">
-                <template slot-scope="scope">
-                  {{scope.row.bindStatus === 1 ? '已绑定' : '未绑定'}}
-                </template>
-              </el-table-column>
-              <el-table-column label="启用状态" show-overflow-tooltip sortable v-if="deviceColumnVisible.enableStatus">
-                <template slot-scope="scope">
-                  {{scope.row.enableStatus === 1 ? '启用' : '禁用'}}
-                </template>
-              </el-table-column>
-              <el-table-column label="在线状态" show-overflow-tooltip sortable v-if="deviceColumnVisible.onlineStatus">
-                <template slot-scope="scope">
-                  {{scope.row.onlineStatus === 1 ? '在线' : '离线'}}
-                </template>
-              </el-table-column>
-              <el-table-column label="工作状态" show-overflow-tooltip sortable v-if="deviceColumnVisible.powerStatus">
-                <template slot-scope="scope">
-                  <template v-if='scope.row.onlineStatus'>
-                    {{scope.row.powerStatus === 1 ? '开机' : '关机'}}
-                  </template>
-                  <template v-else>
-                    - -
-                  </template>
-                </template>
-              </el-table-column>
-              <el-table-column prop="modelName" label="型号名" show-overflow-tooltip sortable v-if="deviceColumnVisible.modelName">
-              </el-table-column>
-              <el-table-column prop="modelCode" label="型号" show-overflow-tooltip sortable v-if="deviceColumnVisible.modelCode">
-              </el-table-column>
-              <el-table-column label="创建时间" show-overflow-tooltip sortable v-if="deviceColumnVisible.birthTime">
-                <template slot-scope="scope">
-                  {{new Date(scope.row.birthTime).toLocaleString()}}
-                </template>
-              </el-table-column>
-              <el-table-column label="最后上线时间" show-overflow-tooltip sortable v-if="deviceColumnVisible.lastOnlineTime">
-                <template slot-scope="scope">
-                  <template v-if='scope.row.lastOnlineTime'>
-                    {{new Date(scope.row.lastOnlineTime).toLocaleString()}}
-                  </template>
-                  <template v-else>
-                    - -
-                  </template>
-                </template>
-              </el-table-column>
-              <el-table-column prop="createUser" label="创建人ID" show-overflow-tooltip sortable v-if="deviceColumnVisible.createUser">
-              </el-table-column>
-              <el-table-column prop="location" label="地理位置" show-overflow-tooltip  v-if="deviceColumnVisible.location">
-              </el-table-column>
-              <el-table-column prop="manageName" label="管理名称" show-overflow-tooltip sortable v-if="deviceColumnVisible.manageName">
-              </el-table-column>
-              <el-table-column label="操作">
-                <template slot-scope="scope">
-                  <el-button type="text" @click="showDetail(scope.row)">详情</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-            <el-alert v-else title="该主设备下没有对应从设备！" type="info" center show-icon :closable="false"></el-alert>
-          </template>
-        </el-table-column>
+      <el-table :data="computeDeviceList" style="width: 100%" @selection-change="handleSelectionChange" class="mb20" border>
         <el-table-column type="selection"></el-table-column>
-        <el-table-column prop="id" label="设备ID" show-overflow-tooltip sortable v-if="deviceColumnVisible.id">
+        <el-table-column prop="id" label="设备编号" show-overflow-tooltip sortable v-if="deviceColumnVisible.id">
         </el-table-column>
-        <el-table-column prop="name" label="名称" show-overflow-tooltip sortable v-if="deviceColumnVisible.name">
+        <el-table-column prop="franNo" label="加盟商" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="mac" label="MAC" show-overflow-tooltip v-if="deviceColumnVisible.mac">
+        <el-table-column prop="name" label="设备名称" show-overflow-tooltip sortable v-if="deviceColumnVisible.name">
         </el-table-column>
-        <el-table-column prop="customerName" label="归属" show-overflow-tooltip sortable v-if="deviceColumnVisible.customerName">
+        <el-table-column prop="modelName" label="设备型号" show-overflow-tooltip v-if="deviceColumnVisible.mac">
         </el-table-column>
-        <el-table-column label="分配状态" show-overflow-tooltip v-if="deviceColumnVisible.assignStatus">
+        <el-table-column prop="groundName" label="设备场所" show-overflow-tooltip sortable v-if="deviceColumnVisible.customerName">
+        </el-table-column>
+        <el-table-column prop="deviceNo" label="设备mac" show-overflow-tooltip sortable v-if="deviceColumnVisible.customerName">
+        </el-table-column>
+        <el-table-column prop="isActive" label="激活状态" show-overflow-tooltip sortable v-if="deviceColumnVisible.customerName">
           <template slot-scope="scope">
-            {{scope.row.assignStatus === 1 ? '已分配' : '未分配'}}
+            <template v-if="scope.row.isActive == 1">
+              已激活
+            </template>
+            <template v-else>
+              未激活
+            </template>
           </template>
         </el-table-column>
-        <el-table-column label="绑定状态" show-overflow-tooltip v-if="deviceColumnVisible.bindStatus">
+        <el-table-column prop="onlineStatus" label="在线状态" show-overflow-tooltip >
           <template slot-scope="scope">
-            {{scope.row.bindStatus === 1 ? '已绑定' : '未绑定'}}
+            <template v-if="scope.row.onlineStatus == 1">
+              在线
+            </template>
+            <template v-else>
+              离线
+            </template>
           </template>
         </el-table-column>
-        <el-table-column label="启用状态" show-overflow-tooltip v-if="deviceColumnVisible.enableStatus">
+        <!-- <el-table-column prop="warningStatus" label="告警状态" show-overflow-tooltip sortable v-if="deviceColumnVisible.groupName">
+        </el-table-column> -->
+        <el-table-column prop="workStatus" label="工作状态" show-overflow-tooltip >
           <template slot-scope="scope">
-            {{scope.row.enableStatus === 1 ? '启用' : '禁用'}}
+            <template v-if="scope.row.workStatus == 1">
+              正在使用
+            </template>
+            <template v-else>
+              待机状态
+            </template>
           </template>
         </el-table-column>
-        <el-table-column prop="groupName" label="项目名" show-overflow-tooltip sortable v-if="deviceColumnVisible.groupName">
+        <el-table-column prop="investName" label="投资人" show-overflow-tooltip v-if="deviceColumnVisible.powerStatus">
         </el-table-column>
-        <el-table-column label="在线状态" show-overflow-tooltip sortable v-if="deviceColumnVisible.onlineStatus">
-          <template slot-scope="scope">
-            {{scope.row.onlineStatus === 1 ? '在线' : '离线'}}
-          </template>
+        <el-table-column prop="modelName" label="本日营收" show-overflow-tooltip sortable v-if="deviceColumnVisible.modelName">
         </el-table-column>
-        <el-table-column label="工作状态" show-overflow-tooltip v-if="deviceColumnVisible.powerStatus">
+        <el-table-column prop="modelCode" label="累计营收" show-overflow-tooltip v-if="deviceColumnVisible.modelCode">
+        </el-table-column>
+         <el-table-column prop="userName" label="激活状态" show-overflow-tooltip v-if="deviceColumnVisible.userName">
+        </el-table-column>
+        <el-table-column label="最后上线时间" show-overflow-tooltip v-if="deviceColumnVisible.birthTime">
           <template slot-scope="scope">
-            <template v-if='scope.row.onlineStatus'>
-              {{scope.row.powerStatus === 1 ? '开机' : '关机'}}
+           <template v-if='scope.row.createTime'>
+              {{new Date(scope.row.createTime).toLocaleString()}}
             </template>
             <template v-else>
               - -
             </template>
           </template>
         </el-table-column>
-        <el-table-column prop="modelName" label="型号名" show-overflow-tooltip sortable v-if="deviceColumnVisible.modelName">
+        <el-table-column label="激活人" show-overflow-tooltip v-if="deviceColumnVisible.lastOnlineTime">
         </el-table-column>
-        <el-table-column prop="modelCode" label="型号" show-overflow-tooltip v-if="deviceColumnVisible.modelCode">
+        <el-table-column prop="createUser" label="所在区域" show-overflow-tooltip sortable v-if="deviceColumnVisible.createUser">
         </el-table-column>
-         <el-table-column prop="userName" label="绑定用户" show-overflow-tooltip v-if="deviceColumnVisible.userName">
-        </el-table-column>
-        <el-table-column label="创建时间" show-overflow-tooltip v-if="deviceColumnVisible.birthTime">
+        <el-table-column prop="ewm" label="二维码" show-overflow-tooltip width="200px" align="center">
           <template slot-scope="scope">
-            {{new Date(scope.row.birthTime).toLocaleString()}}
+            <vue-qrcode :value="scope.row.ewm" :options="{ width: 150 }"></vue-qrcode>
           </template>
         </el-table-column>
-        <el-table-column label="最后上线时间" show-overflow-tooltip v-if="deviceColumnVisible.lastOnlineTime">
-          <template slot-scope="scope">
-            <template v-if='scope.row.lastOnlineTime'>
-              {{new Date(scope.row.lastOnlineTime).toLocaleString()}}
-            </template>
-            <template v-else>
-              - -
-            </template>
-          </template>
+        <el-table-column prop="manageName" label="IMEI" show-overflow-tooltip v-if="deviceColumnVisible.manageName">
         </el-table-column>
-        <el-table-column prop="createUser" label="创建人Id" show-overflow-tooltip sortable v-if="deviceColumnVisible.createUser">
+        <el-table-column prop="manageName" label="MAC" show-overflow-tooltip v-if="deviceColumnVisible.MAC">
         </el-table-column>
-        <el-table-column prop="location" label="地理位置" show-overflow-tooltip v-if="deviceColumnVisible.location">
+        <el-table-column prop="description" label="备注信息" show-overflow-tooltip v-if="deviceColumnVisible.information">
         </el-table-column>
-        <el-table-column prop="manageName" label="管理名称" show-overflow-tooltip v-if="deviceColumnVisible.manageName">
-        </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="操作" align="center">
           <template slot-scope="scope">
             <el-button type="text" @click="showEdit(scope.row)">编辑</el-button>
             <el-button type="text" @click="showDetail(scope.row)">详情</el-button>
-            <el-button v-if='isPro()' type="danger" icon="el-icon-delete" @click="deleteCompletely(scope.row)" circle></el-button>
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination :current-page="query.page" :page-sizes="[100,200,300,400]" :page-size="query.limit" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange" @current-change="handleCurrentChange">
+      <el-pagination :current-page="query.page" :page-sizes="[100,200,300,400]" :page-size="query.length" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange" @current-change="handleCurrentChange">
       </el-pagination>
     </el-card>
     <device-import-dialog :visible.sync="deviceImportDialogVisible" @add-data='addData'></device-import-dialog>
     <device-add-dialog @add-data='addData' :visible.sync="deviceAddDialogVisible"></device-add-dialog>
-    <device-allocate-dialog @onAllocate='onAllocate' :visible.sync="deviceAllocateDialogVisible" :device-list="selectedDeviceList"></device-allocate-dialog>
-    <device-delete-dialog :visible.sync="deviceDeleteDialogVisible" :device-list="selectedDeviceList"></device-delete-dialog>
+    <!-- <device-allocate-dialog :visible.sync="deviceAllocateDialogVisible" :device-list="selectedDeviceList"></device-allocate-dialog> -->
+    <!-- <device-delete-dialog :visible.sync="deviceDeleteDialogVisible" :device-list="selectedDeviceList"></device-delete-dialog> -->
     <device-recover-dialog :visible.sync="deviceRecoverDialogVisible" :device-list="selectedDeviceList"></device-recover-dialog>
     <device-free-dialog :visible.sync="deviceFreeDialogVisible" :device-list="selectedDeviceList"></device-free-dialog>
     <device-disable-dialog :visible.sync="deviceDisableDialogVisible" :device-list="selectedDeviceList"></device-disable-dialog>
-    <device-able-dialog :visible.sync="deviceAbleDialogVisible" :device-list="selectedDeviceList"></device-able-dialog>
-    <device-cluster-dialog :visible.sync="deviceClusterDialogVisible" :device-list="selectedDeviceList"></device-cluster-dialog>
-    <device-cluster-control-dialog :visible.sync="deviceClusterControlDialogVisible"></device-cluster-control-dialog>
-    <device-bind-dialog :visible.sync="deviceBindDialogVisible" :device-list="selectedDeviceList"></device-bind-dialog>
-    <device-unbind-dialog :visible.sync="deviceUnbindDialogVisible" :device-list="selectedDeviceList"></device-unbind-dialog>
+    <!-- <device-able-dialog :visible.sync="deviceAbleDialogVisible" :device-list="selectedDeviceList"></device-able-dialog> -->
+    <!-- <device-cluster-dialog :visible.sync="deviceClusterDialogVisible" :device-list="selectedDeviceList"></device-cluster-dialog> -->
+    <!-- <device-cluster-control-dialog :visible.sync="deviceClusterControlDialogVisible"></device-cluster-control-dialog> -->
+    <!-- <device-bind-dialog :visible.sync="deviceBindDialogVisible" :device-list="selectedDeviceList"></device-bind-dialog> -->
+    <!-- <device-unbind-dialog :visible.sync="deviceUnbindDialogVisible" :device-list="selectedDeviceList"></device-unbind-dialog> -->
     <device-detail-dialog :visible.sync="deviceDetailDialogVisible" :detail-data='detailData'></device-detail-dialog>
-    <device-edit-dialog :visible.sync="deviceEditDialogVisible" :edit-data='editData' @update-data='updateData'></device-edit-dialog>
+    <device-edit-dialog  :data='editDatasd' :visible.sync="deviceEditDialogVisible"></device-edit-dialog>
     <device-export-dialog :visible.sync="deviceExportDialogVisible" :total="total" :query="query" :deviceColumnVisible="deviceColumnVisible"></device-export-dialog>
     <el-dialog top='4vh' :close-on-click-modal=false title="自定义显示列" :visible.sync="deviceColumnControlDialogVisible">
       <el-form inline>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.name">名称</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.id">设备编号</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.mac">MAC</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.name">设备名称</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.customerName">归属</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.deviceNo">设备型号</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.bindStatus">绑定状态</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.customerName">设备场所</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.enableStatus">启用状态</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.assignStatus">收费规则</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.clusterName">项目名</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.bindStatus">业务归属</el-checkbox>
         </el-form-item>
          <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.userName">绑定用户</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.enableStatus">在线状态</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.powerStatus">工作状态</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.onlineStatus">工作状态</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.onlineStatus">在线状态</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.powerStatus">投资人</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.assignStatus">分配状态</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.groupName">告警状态</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.id">设备ID</el-checkbox>
-        </el-form-item>
-        <!-- <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.deviceNo">设备ID</el-checkbox>
-        </el-form-item> -->
-        <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.modelName">型号名</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.modelName">本日营收</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.modelCode">型号</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.modelCode">累计营收</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.birthTime">创建时间</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.userName">激活状态</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.lastOnlineTime">最后上线时间</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.birthTime">最后上线时间</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.createUser">创建人</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.lastOnlineTime">激活人</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.location">地理位置</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.createUser">所在区域</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox v-model="deviceColumnVisible.manageName">管理名称</el-checkbox>
+          <el-checkbox v-model="deviceColumnVisible.location">二维码</el-checkbox>
+        </el-form-item>
+        <el-form-item>
+          <el-checkbox v-model="deviceColumnVisible.manageName">IMEI</el-checkbox>
+        </el-form-item>
+        <el-form-item>
+          <el-checkbox v-model="deviceColumnVisible.MAC">mac</el-checkbox>
+        </el-form-item>
+        <el-form-item>
+          <el-checkbox v-model="deviceColumnVisible.information">备注信息</el-checkbox>
+        </el-form-item>
+        <el-form-item>
+          <el-checkbox v-model="deviceColumnVisible.manageName">操作</el-checkbox>
         </el-form-item>
       </el-form>
-      <!-- <div>
-        <h3>筛选设备</h3>
-        <el-form label-width="100px" label-location="left">
-          <el-form-item label-width='0'>
-            <el-radio-group v-model='showDeviceDeleted' @change="showDeviceDeletedChange">
-              <el-radio :label="true">已删除设备</el-radio>
-              <el-radio :label="false">正常设备</el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item label-width='0'>
-            <el-radio-group v-model='showDeviceBind' @change="showDeviceBindedChange">
-              <el-radio :label="true">已绑定</el-radio>
-              <el-radio :label="false">未绑定</el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item label-width='0'>
-            <el-radio-group v-model='showDeviceAllocate' @change="showDeviceAllocatedChange">
-              <el-radio :label="true">已分配</el-radio>
-              <el-radio :label="false">未分配</el-radio>
-            </el-radio-group>
-          </el-form-item> -->
-          <!-- <el-form-item label-width='0'>
-            <el-radio-group v-model='showDeviceEnable' @change="showDeviceEnabledChange">
-              <el-radio :label="true">已启用</el-radio>
-              <el-radio :label="false">已禁用</el-radio>
-            </el-radio-group>
-          </el-form-item> -->
-          <!-- <el-form-item label-width='0'>
-            <el-radio-group v-model='showDeviceOnline' @change="showDeviceOnlineChange">
-              <el-radio :label="true">在线</el-radio>
-              <el-radio :label="false">离线</el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item label-width='0'>
-            <el-radio-group v-model='showDevicePower' @change="showDevicePoweredChange">
-              <el-radio :label="true">开机</el-radio>
-              <el-radio :label="false">关机</el-radio>
-            </el-radio-group>
-          </el-form-item>
-        </el-form>
-      </div> -->
       <div slot="footer">
         <el-button type="primary" @click="deviceColumnControlDialogVisible = false">确定</el-button>
       </div>
@@ -309,13 +226,15 @@ import DeviceUnbindDialog from './components/DeviceUnbindDialog'
 import DeviceDetailDialog from './components/DeviceDetailDialog'
 import DeviceEditDialog from './components/DeviceEditDialog'
 import DeviceExportDialog from './components/DeviceExportDialog'
+import VueQrcode from '@chenfengyuan/vue-qrcode'
 import {
-  getList,
-  deleteOneDevice,
-  queryChildDevice,
-  deleteDevice,
-  queryDeviceById
-} from '@/api/device/list'
+  list,
+  detail,
+  devicedel,
+  details,
+  patchDeviceActive,
+  patchDeviceUnActive
+} from '@/api/zulin'
 
 export default {
   components: {
@@ -333,23 +252,25 @@ export default {
     DeviceUnbindDialog,
     DeviceDetailDialog,
     DeviceEditDialog,
-    DeviceExportDialog
+    DeviceExportDialog,
+    VueQrcode
   },
   data() {
     return {
+      value:'',
       deviceList: [],
-      deviceImportDialogVisible: false,
-      deviceAddDialogVisible: false,
-      deviceAllocateDialogVisible: false,
-      deviceDeleteDialogVisible: false,
+      deviceImportDialogVisible: false, //导入
+      deviceAddDialogVisible: false,  //添加
+      // deviceAllocateDialogVisible: false,
+      // deviceDeleteDialogVisible: false,
       deviceRecoverDialogVisible: false,
       deviceFreeDialogVisible: false,
       deviceDisableDialogVisible: false,
-      deviceAbleDialogVisible: false,
-      deviceClusterDialogVisible: false,
-      deviceClusterControlDialogVisible: false,
-      deviceBindDialogVisible: false,
-      deviceUnbindDialogVisible: false,
+      // deviceAbleDialogVisible: false,
+      // deviceClusterDialogVisible: false,
+      // deviceClusterControlDialogVisible: false,
+      // deviceBindDialogVisible: false,
+      // deviceUnbindDialogVisible: false,
       deviceDetailDialogVisible: false,
       deviceEditDialogVisible: false,
       deviceExportDialogVisible: false,
@@ -357,182 +278,77 @@ export default {
       deviceColumnVisible: {
         name: true,
         mac: true,
-        customerName: false,
-        deviceType: true,
-        assignStatus: false,
+        customerName: true,
+        deviceType: false,
+        assignStatus: true,
         bindStatus: false,
         enableStatus: true,
-        groupId: true,
+        groupId: false,
         id: true,
         groupName: true,
-        powerStatus: true,
+        powerStatus: false,
         onlineStatus: true,
         modelName: false,
         modelCode: false,
-        birthTime: false,
-        lastOnlineTime: true,
+        birthTime: true,
+        lastOnlineTime: false,
         bindCustomer: false,
         location: true,
         createUser: false,
-        manageName: true,
-        userName: false
+        manageName: false,
+        userName: false,
+        MAC:false,
+        information:false
       },
       deviceColumnControlDialogVisible: false,
       query: {
-        limit: 100,
+        length: 100,
         page: 1,
-        status: 1
+      },
+      query1: {
+        length: 10000,
+        page: 1,
       },
       total: 1,
       detailData: {},
-      editData: {},
-      showDeviceDeleted: false,
-      showDeviceBind: false,
-      showDeviceAllocate: false,
-      showDeviceEnable: false,
-      showDeviceOnline: false,
-      showDevicePower: false,
-      unassignStatus: ''
+      editDatasd: {},
+      unassignStatus: '',
+      computeDeviceList:[],
+      idLists:[]
     }
   },
   computed: {
-    computeDeviceList() {
-      let list = this.deviceList
-      // if (!this.showDeviceAllocate) {
-      //   // 如果不显示分配设备，返回状态不等于 1 的
-      //   list = list.filter(item => item.assignStatus == 1)
-      // }
-      return list
-    }
+
+  },
+  created() {
+    const query = this.$route.query
+    this.list()
+    this.list1()
   },
   methods: {
-    onAllocate(list) {
-      const hasInclude = (device, data) => {
-        // 当前设备包含在data数据里
-        return data.filter(item => item.id === device.id).length !== 0
-      }
-      // 分配成功，修改列表设备分配状态
-      this.deviceList.forEach(device => {
-        if (hasInclude(device, list)) {
-          device.assignStatus = 1
+    reset(){
+      this.query.id = ''
+      this.query.groundName = ''
+      this.query.modelName = ''
+      this.query.deviceNo = ''
+      this.list()
+    },
+    selectList(){
+
+    },
+    list(){
+      list(this.query).then(res=>{
+        this.computeDeviceList = res.data
+        const data = res.data
+        for(var i = 0;i< data.length;i++){
+          this.computeDeviceList[i].ewm = `http://${window.location.host}/h5/init?deveceNo=${data[i].deviceNo}&pay=1`
         }
       })
     },
-    expandChanged(data) {
-      if (
-        data.childCount === 0 ||
-        (data.childDeviceList && data.childDeviceList.length > 0)
-      ) {
-        return
-      }
-      this.queryChildDevice(data.id, data)
-    },
-    showDeviceEnabledChange() {
-      if (!this.showDeviceEnable) {
-        this.query.enableStatus = 0
-      } else {
-        this.query.enableStatus = 1
-      }
-      this.getList()
-    },
-    showDeviceOnlineChange() {
-      if (!this.showDeviceOnline) {
-        this.query.onlineStatus = 0
-      } else {
-        this.query.onlineStatus = 1
-      }
-      this.getList()
-    },
-    showDevicePoweredChange() {
-      if (!this.showDevicePower) {
-        this.query.powerStatus = 0
-      } else {
-        this.query.powerStatus = 1
-      }
-      this.getList()
-    },
-    queryChildDevice(id, data) {
-      queryChildDevice(id).then(res => {
-        // 把获取到的从设备数据添加到主设备数据中
-        data.childDeviceList = res.data
+    list1(){
+      list(this.query1).then(res=>{
+        this.total = (res.data).length
       })
-    },
-    showDeviceDeletedChange() {
-      if (!this.showDeviceDeleted) {
-        this.query.status = 1
-      } else {
-        this.query.status = 2
-      }
-      this.getList()
-    },
-    showDeviceBindedChange() {
-      if (!this.showDeviceBind) {
-        this.query.bindStatus = 0
-      } else {
-        this.query.bindStatus = 1
-      }
-      this.getList()
-    },
-    showDeviceAllocatedChange() {
-      if (!this.showDeviceAllocate) {
-        this.query.allocateStatus = 0
-      } else {
-        this.query.allocateStatus = 1
-      }
-      this.getList()
-    },
-    showDetail(data) {
-      queryDeviceById(data.id).then(res => {
-        this.deviceDetailDialogVisible = true
-        this.detailData = res.data
-      })
-    },
-    showEdit(data) {
-      queryDeviceById(data.id).then(res => {
-        this.deviceEditDialogVisible = true
-        this.editData = res.data
-      })
-    },
-    getSld() {
-      // 获取二级域名
-      const sld = location.href.match(/:\/\/(.*?).hcocloud/)
-      if (sld) {
-        return sld[1]
-      }
-      return ''
-    },
-    isPro() {
-      // 是正式环境或者开发环境？
-      const sld = this.getSld()
-      return sld === 'pro' || sld === '' || sld === 'dev'
-    },
-    deleteCompletely(data) {
-      // 彻底删除设备
-      this.$confirm('此操作将永久删除设备, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          deleteDevice({
-            mac: data.mac,
-            deviceId: data.id
-          }).then(() => {
-            this.deviceList = this.deviceList.filter(
-              item => item.id !== data.id
-            )
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            })
-          })
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除！'
-          })
-        })
     },
     handleSelectionChange(selection) {
       this.selectedDeviceList = selection
@@ -540,34 +356,28 @@ export default {
         this.unassignStatus = this.selectedDeviceList[0].assignStatus
       }
     },
-    getList(query) {
-      // 可以根据参数查询某个 或者 根据分页参数查询多个
-      getList(query ? query : this.query).then(res => {
-        const data = res.data
-        this.deviceList = data.dataList
-        this.total = data.totalCount
+    showEdit(val){
+      details(val.deviceNo).then(res=>{
+        this.editDatasd = res.data
+        this.deviceEditDialogVisible = true
+      })
+    },
+    showDetail(val){
+      this.deviceDetailDialogVisible = true
+      detail(val.deviceNo).then(res=>{
+        this.detailData = res.data
       })
     },
     handleSizeChange(val) {
-      this.query.limit = val
-      this.getList()
+      this.query.length = val
+      this.list()
     },
     handleCurrentChange(val) {
       this.query.page = val
-      this.getList()
+      this.list()
     },
     addData(data) {
-      const list = data.deviceList
-      list.forEach(item => {
-        item.assignStatus = 0
-        item.bindStatus = 0
-        item.enableStatus = 0
-        item.groupId = -1
-        item.powerStatus = 0
-        item.groupName = '无项目'
-        item.onlineStatus = 0
-      })
-      this.deviceList.push(...list)
+      this.list()
     },
     updateData(data) {
       this.deviceList.map(item => {
@@ -577,97 +387,114 @@ export default {
       })
     },
     deleteOneDeviceHandler() {
+      const ids = []
+      for(var i = 0;i<this.selectedDeviceList.length;i++){
+        ids.push((this.selectedDeviceList)[i].id)
+      }
+      devicedel({idList:ids}).then(res => {
+            // const form = this.selectedDeviceList
+          this.$message({
+              message: '添加设备成功！',
+              type: 'success'
+            })
+          this.list()
+        })
+      // this.isOperable().then(_ => {
+      //   this.$confirm('将执行删除操作, 是否继续?', '提示', {
+      //     confirmButtonText: '确定',
+      //     cancelButtonText: '取消',
+      //     type: 'warning'
+      //   })
+      //     .then(() => {
+      //       const form = this.selectedDeviceList
+      //     })
+      //     .catch(() => {
+      //       this.$message({
+      //         type: 'info',
+      //         message: '已取消删除'
+      //       })
+      //     })
+      // })
+    },
+    // 分配
+    handleDeviceRecover() {
+        this.deviceRecoverDialogVisible = true
+    },
+    // 取消激活
+    handleDeviceFree() {
       this.isOperable().then(_ => {
-        this.$confirm('将执行删除操作, 是否继续?', '提示', {
+        for(var i = 0;i<this.selectedDeviceList.length;i++){
+          this.idLists.push((this.selectedDeviceList)[i].deviceNo)
+        }
+      this.isOperable().then(_ => {
+        this.$confirm('将执行取消激活操作, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
           .then(() => {
-            const form = this.selectedDeviceList
-            deleteOneDevice({
-              deviceId: form[0].id,
-              mac: form[0].mac
-            }).then(() => {
-              this.deviceList.forEach(item => {
-                // 如果在用户选择的删除列表中
-                if (this.selectedDeviceList.some(obj => obj.mac === item.mac)) {
-                  item.status = 2
-                }
-              })
+          patchDeviceUnActive({value:this.idLists}).then(res=>{
+            if(res.data){
               this.selectedDeviceList = []
+              this.list()
               this.$message({
                 type: 'success',
-                message: `设备删除成功: ${form[0].name}`
+                message: '取消激活成功'
               })
-            })
+            }else{
+              this.$message({
+                type: 'error',
+                message: '取消激活失败'
+              })
+            }
+          })
           })
           .catch(() => {
             this.$message({
               type: 'info',
-              message: '已取消删除'
+              message: '已取消操作'
             })
           })
       })
-    },
-    // 恢复
-    handleDeviceRecover() {
-      this.isOperable().then(_ => {
-        this.deviceRecoverDialogVisible = true
       })
     },
-    // 分配
-    handleDeviceAllocate() {
-      this.isOperable().then(_ => {
-        this.deviceAllocateDialogVisible = true
-      })
-    },
-    // 召回
-    handleDeviceFree() {
-      this.isOperable().then(_ => {
-        this.deviceFreeDialogVisible = true
-      })
-    },
-    // 禁用
+    // 激活
     handleDeviceDisable() {
       this.isOperable().then(_ => {
-        this.deviceDisableDialogVisible = true
-      })
-    },
-    // 启用
-    handleDeviceAble() {
-      this.isOperable().then(_ => {
-        this.deviceAbleDialogVisible = true
-      })
-    },
-    // 项目
-    handleDeviceCluster() {
-      this.isOperable().then(_ => {
-        // 判断项目id是否一致，不一致不可项目
-        const groupids = this.selectedDeviceList.filter(v => v.groupId !== -1)
-        if (
-          groupids.length &&
-          groupids.some(v => v.groupId !== groupids[0].groupId)
-        ) {
-          this.$message.warning(
-            '请确保所有选中设备的项目名称一致（无项目除外）'
-          )
-          return
+        for(var i = 0;i<this.selectedDeviceList.length;i++){
+          this.idLists.push(this.selectedDeviceList[i].deviceNo)
         }
-        this.deviceClusterDialogVisible = true
-      })
-    },
-    handleDeviceBind() {
-      this.isOperable().then(_ => {
-        this.assignStatus().then(_ => {
-          this.deviceBindDialogVisible = true
+        console.log(this.idLists)
+        this.isOperable().then(_ => {
+        this.$confirm('将执行激活操作, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         })
+          .then(() => {
+        patchDeviceActive({value:this.idLists}).then(res =>{
+          if(res.data){
+            this.selectedDeviceList = []
+            this.$message({
+              type: 'success',
+              message: '激活成功'
+            })
+            this.list()
+          }else{
+            this.$message({
+              type: 'error',
+              message: '激活失败'
+            })
+          }
+        })
+        })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消操作'
+            })
+          })
       })
-    },
-    // 解绑
-    handleDeviceUnbind() {
-      this.isOperable().then(_ => {
-        this.deviceUnbindDialogVisible = true
       })
     },
     isOperable() {
@@ -691,14 +518,6 @@ export default {
           this.$message.warning('选中的设备中有未分配设备，请重新操作')
         }
       })
-    }
-  },
-  created() {
-    const query = this.$route.query
-    if (Object.keys(query).length !== 0) {
-      this.getList(query)
-    } else {
-      this.getList()
     }
   }
 }

@@ -1,13 +1,7 @@
 export default {
   route: {
     dashboard: '首页',
-    analytics: '数据分析',
-    orderAnalytics: '订单数据',
-    userAnalytics: '用户数据',
-    deviceAnalytics: '设备数据',
-    systemAnalytics: '系统分析',
-    bigDataPanel: '大数据看板',
-    newBigDataPanel: '新大数据看板',
+
     // 设备管理
     device: '设备管理',
     deviceList: '设备列表',
@@ -16,24 +10,44 @@ export default {
     deviceConfig: '设备型号管理',
     deviceModel: '设备类型管理',
     deviceFunction: '设备功能管理',
+
+ 
+
+    analytics: '用户管理',
+    orderAnalytics: '微信用户',
+    userAnalytics: '用户数据',
+    deviceAnalytics: '设备数据',
+    systemAnalytics: '系统分析',
+    bigDataPanel: '大数据看板',
+    newBigDataPanel: '新大数据看板',
     // 售后管理
-    alarm: '售后管理',
-    alarmProcess: '创建规则',
-    alarmDevice: '保养计划',
-    alarmConfig: '维保任务',
+    alarm: '合作方管理',
+    alarmProcess: '场地管理',
+    alarmDevice: '设备主',
+    alarmConfig: '加盟商',
+    alarmOperator: '业务总监',
+    alarmReferees: '推荐人',
+
+    apply: '合作方申请',
+    applySite: '场地申请',
+    applyDev: '设备主申请',
+    applyPeople: '总监申请',  
+    applyFran: '加盟商申请',  
+
+
     order: '订单中心',
-    rentOrder: '租凭订单列表',
-    paymentOrder: '租凭充值列表',
+    rentOrder: '设备购买订单',
+    paymentOrder: '消费订单',
     salesOrder: '分销订单',
     afterSaleOrder: '售后订单',
     income: '分润管理',
-    incomeRule: '分润规则',
+    incomeRule: '提现管理',
     incomeBill: '分润账单',
-    rent: '基础数据维护',
-    rentWechat: '实施阶段',
-    rentBlacklist: '工程系统分类',
-    rentToll: '资料分类',
-    rentPutin: '维保模板',
+    rent: '收费管理',
+    rentWechat: '收费规则',
+    rentBlacklist: '产品定价',
+    // rentToll: '资料分类',
+    // rentPutin: '维保模板',
     // rentOperator: '运营商管理',
     // rentPayment: '充值设定',
     system: '系统管理',
@@ -49,8 +63,8 @@ export default {
     message: '消息管理',
     systemMessage: '告警信息列表',
     userMessage: '客户反馈',
-    alarmMessage: '消息列表',
-    afterSaleMessage: '通知消息'
+    alarmMessage: '用户反馈',
+    // afterSaleMessage: '通知消息'
   },
   navbar: {
     logOut: '退出登录',
@@ -62,6 +76,7 @@ export default {
   login: {
     title: '系统登录',
     logIn: '登录',
+    WX: '扫码一键登录',
     username: '账号',
     password: '密码',
     any: '随便填',

@@ -56,9 +56,7 @@ export default {
     ss(){
       console.log(window.location.host)
       if(window.location.host == "dasklima.hcocloud.com"){
-        console.log(11)
       }else{
-        console.log(22)
         this.$router.push({
           path: '/merge',
           query: {}

@@ -160,7 +160,7 @@ export default {
     }
   },
   created() {
-    this.getCustomer()
+    // this.getCustomer()
   }
 }
 </script>

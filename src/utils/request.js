@@ -1,12 +1,15 @@
 import axios from 'axios'
 import { Message, Loading } from 'element-ui'
 import store from '@/store'
+import { getToken } from '@/utils/auth' // getToken from cookie
+
 
 // 里面的域名的response不显示错误
 const showNotError = [
   'api/customer/selectBackendConfigBySLD',
   'api/device/newQueryDetailByDeviceId',
-  'api/device/deviceShareList'
+  'api/device/deviceShareList',
+  '/manage/user/wxKeyLogin'
 ]
 
 // 如果url在白名单里
@@ -39,7 +42,7 @@ service.interceptors.request.use(
     // Do something before request is sent
     // if (store.getters.token) {
     //   // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
-    //   config.headers['X-Token'] = getToken()
+      config.headers['X-Token'] = getToken()
     // }
     if (!config.notLoading) {
       startLoading()

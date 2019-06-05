@@ -1,21 +1,58 @@
 <template>
-  <el-dialog top='4vh' :close-on-click-modal=false title="创建实施阶段" :visible="visible" :before-close="handleCancel" @update:visible="$emit('update:visible', $event)">
-      <el-form label-width="130px" class="mb-22" :model="form" :rules="rules" ref="form">
-        <el-form-item label="实施阶段名称" prop="label">
-          <el-input v-model="form.label" placeholder="实施阶段名称"></el-input>
+  <el-dialog top='4vh' :close-on-click-modal=false title="添加规则" :visible="visible" :before-close="handleCancel" @update:visible="$emit('update:visible', $event)">
+      <p>规则基本信息</p>
+      <el-form label-width="130px" class="mb-22">
+        <el-form-item label="规则名称">
+          <el-input v-model="form.name" placeholder="规则名称"></el-input>
         </el-form-item>
-        <el-form-item label="排序">
-          <el-input v-model="form.sort" placeholder="请输入实施排序"></el-input>
-          <span class="color">*使用时下拉框的排序序号</span>
+        <!-- <el-form-item label="适用产品">
+          <el-input v-model="form.sort" placeholder="适用产品"></el-input>
+        </el-form-item> -->
+        <el-form-item label="奖励有效期(秒)">
+          <el-input v-model="form.time" placeholder="奖励有效期"></el-input>
         </el-form-item>
-        <el-form-item label="标号">
-          <el-input v-model="form.value" placeholder="标号不可重复"></el-input>
-          <span class="color">*备用字段，暂未用，可默认为0</span>
+        <el-form-item label="计费金额">
+          <el-input v-model="form.amount" placeholder="奖励有效期"></el-input>
         </el-form-item>
-        <el-form-item label="实施阶段描述" prop="description">
+        <el-form-item label="规则描述">
           <el-input type="textarea" :rows='3' placeholder="实施阶段描述..." v-model='form.description'></el-input>
         </el-form-item>
+        <el-form-item >
+        </el-form-item>
       </el-form>
+      <!-- <p>收费设置</p>
+      <el-form label-width="130px" class="mb-22">
+        <el-form-item label="计费方式">
+           <el-select v-model="value" placeholder="请选择">
+              <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"> </el-option> 
+           </el-select>
+        </el-form-item>
+        <el-form-item label="计费单位">
+          <el-select v-model="value" placeholder="请选择">
+              <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"> </el-option> 
+           </el-select>
+        </el-form-item>
+        <el-form-item label="计费金额（元）">
+          <el-select v-model="value" placeholder="请选择">
+              <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"> </el-option> 
+           </el-select>
+        </el-form-item>
+        <el-form-item >
+        </el-form-item>
+      </el-form>
+      <p>奖励设置</p>
+      <el-form label-width="130px" class="mb-22">
+        <el-form-item label="奖励方案">
+           <el-select v-model="value" placeholder="请选择">
+              <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"> </el-option> 
+           </el-select>
+        </el-form-item>
+        <el-form-item label="奖励设置">
+          <el-select v-model="value" placeholder="请选择">
+              <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"> </el-option> 
+           </el-select>
+        </el-form-item>
+      </el-form> -->
     <div slot="footer" class="dialog-footer">
       <el-button @click="handleCancel">取消</el-button>
       <el-button type="primary" @click='addDict'>确定</el-button>
@@ -24,7 +61,9 @@
 </template>
 
 <script>
-import { addDict } from '@/api/rent'
+import { 
+  addProductRule
+ } from '@/api/zulin'
 
 export default {
   props: {
@@ -35,6 +74,8 @@ export default {
   },
   data() {
     return {
+       options: [],
+        value: '',
       form: {
         description: '', //描述
         isDelete: 0, // 删除标志 0 为true 未删除 1 false
@@ -43,21 +84,21 @@ export default {
         type: 'implementation', // 类型名
         value: 0  // 不可重复  标号
       },
-      rules: {
-        label: [
-          { required: true, message: '请输入实施阶段名称', trigger: 'blur' },
-          { min: 3, max: 50, message: '长度在 3 到 50 个字符', trigger: 'blur' }
-        ],
-        description: [
-          { required: true, message: '请输入实施阶段描述', trigger: 'blur' },
-          { min: 3, max: 50, message: '长度在 3 到 50 个字符', trigger: 'blur' }
-        ]
-      }
+      // rules: {
+      //   label: [
+      //     { required: true, message: '请输入实施阶段名称', trigger: 'blur' },
+      //     { min: 3, max: 50, message: '长度在 3 到 50 个字符', trigger: 'blur' }
+      //   ],
+      //   description: [
+      //     { required: true, message: '请输入实施阶段描述', trigger: 'blur' },
+      //     { min: 3, max: 50, message: '长度在 3 到 50 个字符', trigger: 'blur' }
+      //   ]
+      // }
     }
   },
   methods: {
     addDict() {
-      addDict(this.form).then(res => {
+      addProductRule(this.form).then(res => {
         if (res.code === 200) {
           this.$message({
             type: 'success',

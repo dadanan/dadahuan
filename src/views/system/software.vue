@@ -163,8 +163,8 @@ export default {
     }
   },
   created() {
-    this.getSoftwareList()
-    this.getCustomer()
+    // this.getSoftwareList()
+    // this.getCustomer()
   },
   components: {
     CreateModelDialog,

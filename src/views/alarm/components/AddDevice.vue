@@ -1,284 +1,376 @@
 <template>
   <div>
-    <el-dialog top='4vh' :close-on-click-modal=false title="添加计划" :visible="visible" :before-close="handleCancel" @update:visible="$emit('update:visible', $event)">
-      <el-form label-width="120px" class="mb-22" :model="form">
-        <el-form-item label="计划名称">
-          <el-input placeholder="计划名称..." v-model='form.name'></el-input>
-        </el-form-item>
-        <el-form-item label="计划描述">
-          <el-input type="textarea" :rows='3' placeholder="计划描述..." v-model='form.description'></el-input>
-        </el-form-item>
-        <el-form-item label="是否规则内">
-          <el-select v-model="form.ruleId" style="width:100%">
-            <el-option v-for='item in list' :label="item.name" :value="item.id" :key='item.id'></el-option>
-          </el-select>
-          <span class="color">*规则内的计划，可按规则自动判断任务告警等级</span>
-        </el-form-item>
-        <el-form-item label="选择关联">
-          <template>
-            <el-radio-group v-model="form.linkType">
-              <el-radio :label="0">不关联</el-radio>
-              <el-radio :label="1">关联设备</el-radio>
-              <el-radio :label="2">关联工程</el-radio>
-            </el-radio-group>
-          </template>
-          <p><span class="color">*选择该计划执行对象，工程保养选择关联工程、设备售后选择关联设备、其它选择不关联；</span></p>
-        </el-form-item>
-        <el-form-item>
-          <template v-if="form.linkType == 0"></template>
-          <template v-if="form.linkType == 1">
-            <el-select v-model="form.linkDeviceModelId" style="width:40%" @change="selectByModelId">
-              <el-option v-for='item in devList' :label="item.name" :value="item.id" :key='item.id'></el-option>
-            </el-select>
-            <el-select v-model="form.linkDeviceId" style="width:40%">
-              <el-option v-for='item in devilist' :label="item.name" :value="item.id" :key='item.id'></el-option>
-            </el-select>
-          </template>
-          <template v-if="form.linkType == 2">
-            <el-select v-model="form.linkProjectId" style="width:100%">
-              <el-option v-for='item in selectLists' :label="item.name" :value="item.id" :key='item.id'></el-option>
-            </el-select>
-          </template>
-        </el-form-item>
-        <el-form-item label="任务发布日期">
-          <template>
-            <el-radio-group v-model="form.cycleType">
-              <el-radio :label="0">仅发布一次</el-radio>
-              <el-radio :label="1">按月生成</el-radio>
-              <el-radio :label="2">按年生成</el-radio>
-            </el-radio-group>
-            <p><span class="color">*任务发布日期   *仅发布一次    *按月生成    *按年生成
-  * 选择计划执行的起始时间，发布任务视为计划预警，任务到期未完成产生告警；
-  * 系统发布任务即视为计划预警，任务发布日至任务截止日之间为任务实际筹备及执行期限；</span></p>
-          </template>
-        </el-form-item>
-        <el-form-item>
-          <template v-if="form.cycleType == 0">
-            <el-date-picker v-model="form.nextExecuteTime" type="date" value-format="timestamp" placeholder="选择日期" :picker-options="pickerOptions0" style="width:70%;margin-left:20px">
-            </el-date-picker>
-          </template>
-          <template v-if="form.cycleType == 1">
-            <span>每</span>
-            <el-input type="number" v-model="form.cycleNums" style="width:10%"></el-input>
-            <span>月生成日期</span>
-            <el-select v-model="dayData" style="width:40%;margin-right:20px">
-              <el-option v-for='item in day' :label="item.name" :value="item.id" :key='item.id'></el-option>
-            </el-select>
-            <el-checkbox v-model="isRightExcute1">立即执行</el-checkbox>
-          </template>
-          <template v-if="form.cycleType == 2">
-            <span>每</span>
-            <el-input type="number" v-model="form.cycleNums" style="width:10%"></el-input>
-            <span>年生成日期</span>
-            <el-select v-model="monthData" style="width:10%;">
-              <el-option v-for='item in months' :label="item.name" :value="item.id" :key='item.id'></el-option>
-            </el-select>
-            <span style="margin:0px 20px">月</span>
-            <el-select v-model="daysData" style="width:10%;margin-right:20px">
-              <el-option v-for='item in day' :label="item.name" :value="item.id" :key='item.id'></el-option>
-            </el-select>
-            <span style="margin-right:20px">日</span>
-            <el-checkbox v-model="isRightExcute1">立即执行</el-checkbox>
-          </template>
-        </el-form-item>
-        <el-form-item label="任务到期时间">
-          <span>任务发布日期后</span>
-          <el-input type="number" v-model='form.overTimeDays' style="width:40%; margin:0px 20px"></el-input>
-          <span>天</span>
-        </el-form-item>
-        <el-form-item label="指定任务负责人">
-          <el-button type="primary " @click="addEle = true">添加</el-button>
-          <p><span class="color">*计划生产的任务，可指定该任务负责人可见，由相关负责人处理该任务；</span></p>
-        </el-form-item>
-        <el-form-item>
-          <el-tag v-if="selectedDeviceList.length >0" v-for="item in selectedDeviceList" :key="item.roleName" :type="item.type" @close="handleClose(item)" style="margin:0px 10px">
-            {{item.userName}}
-          </el-tag>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="handleCancel">取消</el-button>
-        <el-button type="primary" @click='addPlan'>确定</el-button>
+  <el-dialog class='device-detail-container' top='4vh' width='95%' :close-on-click-modal=false title="添加设备主" :visible="visible" @update:visible="$emit('update:visible', $event)">
+    <p>设备主基本信息</p>
+    <div class="flex mb20">
+      <div class="flex-item flex-item--full">
+        <el-card class="el-card--solid">
+          <el-form label-width="90px" label-position="left">
+            <el-row :gutter="20">
+              <el-col :span="8">
+                <el-form-item label="设备主名称 :">
+                  <el-input v-model="form.name" placeholder="请输入内容"></el-input>
+                </el-form-item>
+                <el-form-item label="设备主描述 :">
+                  <el-input v-model="form.description" placeholder="请输入内容"></el-input>                
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">  
+                <el-form-item label="联系人 :">
+                  <el-select v-model="form.masterRegisterNo" placeholder="请选择" @change="changs">
+                    <el-option v-for="item in option" :key="item.id" :label="item.name" :value="item.registerNo"> </el-option> 
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="电话 :">
+                  <el-input v-model="form.mobileNo" disabled></el-input>                
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-card>
+        <p>业务关系</p>
+        <!-- <div class="flex mb20"> -->
+         <el-card class="el-card--solid">
+            <el-form label-width="90px" label-position="left">
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="推荐人1:">
+                    <el-input v-model="form.referrer1Name" disabled></el-input>    
+                  </el-form-item>
+                </el-col> 
+                <el-col :span="12">  
+                  <el-form-item label="分润比例">
+                    <el-input v-model="form.referrer1Percent"></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="推荐人2:">
+                    <el-input v-model="form.referrer2Name" disabled></el-input>    
+                  </el-form-item>
+                </el-col> 
+                <el-col :span="12">  
+                  <el-form-item label="分润比例">
+                    <el-input v-model="form.referrer2Percent"></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="20">
+                <el-col :span="12"  v-if="form.partnerReferrerName">
+                  <el-form-item label=" 育成总监:">
+                    <el-input v-model="form.partnerName" disabled></el-input>    
+                  </el-form-item>
+                </el-col> 
+                <el-col :span="12"  v-else>
+                  <el-form-item label=" 总监:">
+                    <el-input v-model="form.partnerName" disabled></el-input>    
+                  </el-form-item>
+                </el-col> 
+                <el-col :span="12" v-if="form.partnerReferrerName">  
+                  <el-form-item label="总监">
+                    <el-input v-model="form.partnerReferrerName" disabled></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-form>
+          </el-card>
+          <div class="flex-item">
       </div>
-    </el-dialog>
-    <el-dialog top='4vh' :close-on-click-modal=false :visible.sync="addEle">
-      <el-table :data="projects" style="width: 100%" class="mb20" border @selection-change="handleSelectionChange">
+      </div>
+      <!-- </div> -->
+    </div>
+    <div class="flex mb20">
+        <el-card class="el-card--solid map-container">
+          <el-form label-width="50px" label-position="left">
+            <p>场所图册</p>
+            <el-form-item label="图册">
+                <image-uploader :key='4' :urls='filterBg(form.imgsList)' @get-url='setImg' @remove-url='removeImg' :isList='true' :limit='5'></image-uploader>
+            </el-form-item>
+          </el-form>
+        </el-card>
+    </div>
+    <!-- <el-card>
+      <div class="table-opts">
+        <el-button-group>
+          <el-button type="primary" @click="add">添加</el-button>
+          <el-button type="primary" @click="dele">删除</el-button>
+        </el-button-group>
+      </div>
+      <el-table :data="levelList" style="width: 100%" class="mb20" border @selection-change="handleSelectionChange">
         <el-table-column type="selection"></el-table-column>
-        <el-table-column type="index"></el-table-column>
-        <el-table-column prop="userName" label="名称" show-overflow-tooltip sortable>
-        </el-table-column>
-        <el-table-column prop="id" label="id" show-overflow-tooltip sortable>
-        </el-table-column>
+          <el-table-column type="index"></el-table-column>
+          <el-table-column prop="deviceNo" label="deviceNo" show-overflow-tooltip sortable>
+          </el-table-column>
+          <el-table-column prop="name" label="设备名称" show-overflow-tooltip sortable>
+          </el-table-column>
+          <el-table-column prop="modelId" label="型号ID" show-overflow-tooltip sortable>
+          </el-table-column>
+          <el-table-column prop="investPercent" label="分润比例" show-overflow-tooltip sortable>
+            <template slot-scope="scope">
+              <el-input v-model="scope.row.investPercent"></el-input>
+            </template>
+          </el-table-column>
       </el-table>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="addEle = false">取消</el-button>
-        <el-button type="primary" @click="addEle =false ">确定</el-button>
-      </div>
-    </el-dialog>
+    </el-card> -->
+    <div class="btn">
+      <el-button type="primary" @click="$emit('update:visible', false)">取消</el-button>
+      <el-button type="primary" @click="as">确认添加</el-button>
+    </div>
+  </el-dialog>
+  <!-- 添加设备 -->
+  <el-dialog top='4vh' :close-on-click-modal=false title="添加设备" :visible.sync="addRules">
+    <el-form label-width="118px" label-position="left">
+      <el-table :data="levelList1" style="width: 100%" class="mb20" border @selection-change="handleSelectionChange1">
+      <el-table-column type="selection"></el-table-column>
+      <el-table-column type="index"></el-table-column>
+      <el-table-column prop="deviceNo" label="deviceNo" show-overflow-tooltip sortable>
+      </el-table-column>
+      <el-table-column prop="name" label="设备名称" show-overflow-tooltip sortable>
+      </el-table-column>
+      <el-table-column prop="modelId" label="型号ID" show-overflow-tooltip sortable>
+      </el-table-column>
+      <el-table-column prop="investPercent" label="分润比例" show-overflow-tooltip sortable>
+        <template slot-scope="scope">
+          <el-input v-model="scope.row.investPercent"></el-input>
+        </template>
+      </el-table-column>
+    </el-table>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button type="primary" @click="addDeva">确定</el-button>
+    </div>
+  </el-dialog>
   </div>
-
 </template>
 
 <script>
+import Operation from './deviceDetail/Operation'
+import AMap from './deviceDetail/AMap'
+import ShareList from './deviceDetail/ShareList'
+import ImageUploader from "@/components/Upload/image1";
+
 import {
-  addPlan,
-  selectList,
-  selectModelDict,
-  selectByModelId,
-  selectProjectDict
-} from '@/api/alarm'
-import { getUserList } from '@/api/user'
+  updateDevice, //地理位置
+} from '@/api/device/list'
+import {
+  queryGroundDeviceList, //查询场地内的设备信息
+  inQueryFreeDevice,       //查询可分配设备列表
+  updataGroundMaps,      //修改场地位置信息
+  invests,                   //设备主添加
+  getRegisterUserList,   //获取用户信息列表 
+  queryInvestDeviceList,  //查询投资项的设备列表
+  baseParam,
+  getRegisterReferrerInfo,
+  getBaseParam
+} from '@/api/zulin'
+import VueQrcode from '@chenfengyuan/vue-qrcode'
 export default {
   props: {
     visible: {
       type: Boolean,
       default: false
+    },
+    detailData:{
+      type:String
     }
   },
   data() {
-    const paymentList = []
-    for (let i = 1; i < 31; i++) {
-      paymentList.push({
-        id: i,
-        name: i,
-      })
-    }
-    const payment = []
-    for (let i = 1; i < 13; i++) {
-      payment.push({
-        id: i,
-        name: i,
-      })
-    }
     return {
-      day:paymentList, //天数
-      months:payment,  //月
-      monthData:0,
-      dayData:0,
-      daysData:0,
-      addEle: false,
-      selectedDeviceList: [],
-      isRule: '',
-      form: {
-        status: 1,
-        cycleType:0,
-        linkType:0
-      },
-      isRightExcute1: false,
+      addRules:false,
+      addRules1:false,
       query: {
-        limit: 1000,
-        useType:1,
-        page: 1
+        length: 100,
+        page: 1,
       },
-      projects: [],
-      devList: [],
-      devilist: [],
-      selectLists: [],
-      list: [],
-      pickerOptions0: {
-        disabledDate(time) {
-          return time.getTime() < Date.now()
-        }
+      query1: {
+        length: 100,
+        page: 1,
+        parameterName:'rent_invest_referrer1_default_percent'
       },
-      ids: []
+      query2: {
+        length: 100,
+        page: 1,
+        parameterName:'rent_invest_referrer2_default_percent'
+      },
+      levelList:[],
+      modelPercents:{
+      },
+      levelList1:[],
+      option: [],
+      value:'',
+      inputs:'',
+      total:0,
+      addRules:false,
+      addForm:{},
+      tableData: [],
+      form: {
+        imgsList:[],
+      },
+      valId: '',
+      location:'',
+      datas:0,
+      users:{},
+      pars:false,
+      within:false,
+      withins:false,
+      lsArr:[]
     }
+  },
+  created () {
+    this.getRegisterUserList()
+    this.baseParam()
   },
   methods: {
-    selectModelDict() {
-      selectModelDict().then(res => {
-        this.devList = res.data
+    baseParam(){
+      getBaseParam(this.query1).then(res=>{
+        const data = res.data
+        this.form.referrer1Percent = data
+      })
+      getBaseParam(this.query2).then(res=>{
+        const data = res.data
+        this.form.referrer2Percent = data
       })
     },
-    selectList() {
-      selectList(this.query).then(res => {
-        this.list = res.data.ruleRspPoList
+    blurs(val){
+      if( val > 1 || val == 1){
+        this.$message({
+          message: '分润比例必须小于1',
+          type: 'error'
+        })
+      }
+    },
+    changs(val){
+      for(var i=0;i<this.option.length;i++){
+        if(this.option[i].registerNo == val){
+          this.form.mobileNo = this.option[i].mobileNo
+        }
+      }
+      this.getRegisterReferrerInfo(val)
+    },
+    getRegisterReferrerInfo(val){
+      getRegisterReferrerInfo(val).then(res=>{
+        const data = res.data
+        this.form.referrer1Name = data.referrer1Name
+        this.form.referrer2Name = data.referrer2Name
+        this.form.partnerReferrerName = data.partnerReferrerName
+        this.form.partnerName = data.partnerName
+        this.form  = Object.assign({},this.form,{})
       })
     },
-    selectByModelId() {
-      selectByModelId(this.form.linkDeviceModelId).then(res => {
-        this.devilist = res.data
+    dele(){
+      for(var i = 0;i<this.adds.length;i++){
+        this.levelList.splice((this.levelList.indexOf(this.adds[i])),1)
+      }
+    },
+    getRegisterUserList(){
+      getRegisterUserList(this.users).then(res=>{
+        this.option = res.data
       })
     },
-    selectProjectDict() {
-      selectProjectDict().then(res => {
-        this.selectLists = res.data
-      })
-    },
-    addPlan() {
-      for (var i = 0; i < this.selectedDeviceList.length; i++) {
-        this.ids.push(this.selectedDeviceList[i].id)
+    as(){
+      this.form.investDeviceRentInfos=[]
+      // 设备
+      for(var i= 0 ; i<this.levelList.length;i++){
+        this.form.investDeviceRentInfos.push({
+          deviceNo:this.levelList[i].deviceNo,
+          investPercent:this.levelList[i].investPercent
+        })
       }
-      if (this.form.ruleId) {
-        this.form.isRule = 1
-      }
-      if (this.isRightExcute1) {
-        this.form.isRightExcute = 1
-      } else {
-        this.form.isRightExcute = 0
-      }
-      this.form.enableUserList = this.ids
-      if(this.form.cycleType == 1){
-        this.form.day = this.dayData
-      }else if(this.form.cycleType == 2){
-        this.form.day = this.daysData
-        this.form.month = this.monthData
-      }
-      console.log(this.form)
-      addPlan(this.form).then(res => {
-        if (res.code === 200) {
-          this.$message({
-            type: 'success',
-            message: '添加成功!'
-          })
+      invests(this.form).then(res=>{
+        if(res.data){
           this.$emit('update:visible', false)
-          this.$emit('add-data', this.form)
-        } else {
           this.$message({
-            type: 'error',
-            message: res.msg
+            message: '设备主添加成功！',
+            type: 'success'
           })
+        this.$emit('add-data', this.addForm)
         }
       })
     },
-  toggleSelection() {
-      this.addEle = true
-      this.$nextTick(function() {
-        if (this.selectedDeviceList) {
-          this.selectedDeviceList.forEach(row => {
-            this.$refs.multipleTable.toggleRowSelection(row)
-          })
-        }
+    addRuless(){
+      this.addRules1 = false
+      this.tableData.push(this.modelPercents)
+    },
+    add(){
+      this.addRules = true
+      inQueryFreeDevice(this.datas).then(res=>{
+        this.levelList1 = res.data
       })
     },
-    editRule1() {
-      console.log(this.form)
+    filterBg(data) {
+      return data
+    },
+    setImg(file) {
+      this.form.imgsList = [...this.form.imgsList, file.url]
+    },
+    removeImg(file) {
+      // const index = this.form.imgs.findIndex(v => v.image === file.url)
+      this.form.imgsList.splice((this.form.imgsList.indexOf(file.url)),1)
+    },
+    rules(){
+      this.addRules = true
+    },
+    addDeva(){
+      const list = this.lsArr
+      this.addRules = false
+    },
+    init(val) {
+      this.form = JSON.parse(JSON.stringify(val))
+      this.queryGroundDeviceList()
+
+    },
+    getLocation({ gps, location }) {
+      this.form.location = location
+      this.form.gpsMap = gps.toString()
+      this.form = Object.assign({},this.form,{})
+      this.$message({
+        message: '设备位置信息更新成功！',
+        type: 'success'
+      })
     },
     handleSelectionChange(selection) {
-      this.selectedDeviceList = selection
-      console.log(selection)
+      // this.levelList = selection
     },
-    handleCancel() {
-      this.$emit('update:visible', false)
-    },
-    handleClose(tag) {
-      this.selectedDeviceList.splice(this.selectedDeviceList.indexOf(tag), 1)
-      console.log(this.selectedDeviceList)
-    },
-    getUserList() {
-      getUserList().then(res => {
-        // console.log(res.data)
-        if (res.code === 200) {
-          this.projects = res.data
-        }
-      })
+    handleSelectionChange1(selection) {
+      this.lsArr = selection
     }
   },
-  created() {
-    this.selectList()
-    this.getUserList()
-    this.selectModelDict()
-    this.selectProjectDict()
+  components: {
+    Operation,
+    AMap,
+    VueQrcode,
+    ShareList,
+    ImageUploader
   }
 }
 </script>
 
+<style lang="scss" scoped>
+.device-detail-container {
+  margin-bottom: 2rem;
+}
+.flex {
+  display: flex;
+  margin-left: -10px;
+  margin-right: -10px;
+}
+
+.map-container {
+  width: 100%;
+  height: 360px;
+  
+}
+
+.flex-item {
+  margin: 0 10px;
+  &--full {
+    flex: 2;
+  }
+}
+.btn{
+  text-align: right;
+}
+</style>

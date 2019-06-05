@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-container">
     <div class="mb20">
-      <el-button icon="el-icon-edit" type="primary" @click="dialogEditKanbanVisible = true">编辑看板</el-button>
+      <!-- <el-button icon="el-icon-edit" type="primary" @click="dialogEditKanbanVisible = true">编辑看板</el-button> -->
     </div>
     <el-row :gutter="20">
       <el-col :xs="24" :sm="12" :lg="6" v-for="item in kanbanData.数据展示.设备分析" :key="item.id" v-if="item.isVisible">
@@ -75,8 +75,8 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button v-if='!fakeData' @click="test">切换测试数据</el-button>
-        <el-button v-else @click="test">切换真实数据</el-button>
+        <!-- <el-button v-if='!fakeData' @click="test">切换测试数据</el-button>
+        <el-button v-else @click="test">切换真实数据</el-button> -->
         <el-button @click="dialogEditKanbanVisible = false">取消</el-button>
         <el-button type="primary" @click="dialogEditKanbanVisible = false">确定</el-button>
       </div>
@@ -96,7 +96,16 @@ import {
   selectLiveCustomerUserCountPerHour,
   deviceLocationCount
 } from '@/api/big-picture-mode/bigPictureMode'
+import {
+  userDeviceMsg,                   //用户设备统计
+  cushMsg,                        //应收分润统计
+  deviceLocationGraph,            //设备分布地图
+  revenueGraph,                   //营收曲线
+  sellGraph,                      //销售曲线
+  userCountGraph                  //用户增加曲线
+} from '@/api/zulin'
 import { dashboardData, realData } from './dashboardData'
+
 
 export default {
   components: {
@@ -123,15 +132,106 @@ export default {
     }
   },
   created() {
-    this.init()
+    this.userDeviceMsg()
+    this.cushMsg()
+    this.deviceLocationGraph()
+    this.revenueGraph()
+    this.sellGraph()
+    this.userCountGraph()
   },
   methods: {
+    userDeviceMsg(){
+      userDeviceMsg().then(res=>{
+        const data = res.data
+        const dataAnalysis = this.kanbanData.数据展示.设备分析
+        dataAnalysis[0].value = data.deviceNum
+        dataAnalysis[1].value = data.deviceSellNum
+        const userAnalysis = this.kanbanData.数据展示.用户分析
+        userAnalysis[0].value = data.customerAccountNum
+        userAnalysis[2].value = data.dailyActiveUserNum
+        const orderAnalysis = this.kanbanData.数据展示.订单分析
+        orderAnalysis[0].value = data.dailyOrderNum
+        const alarmAnalysis = this.kanbanData.数据展示.告警分析
+        alarmAnalysis[0].value = data.warnNum
+      })
+    },
+    cushMsg(){
+      cushMsg().then(res=>{
+        const data = res.data
+        const dataAnalysis = this.kanbanData.数据展示.环境分析
+        dataAnalysis[0].value = (data.dailyRevenue)/100
+        dataAnalysis[1].value = (data.monthRevenue)/100
+        dataAnalysis[2].value = (data.totalRevenue)/100
+        dataAnalysis[3].value = (data.dailyWithDraw)/100
+        dataAnalysis[4].value = (data.monthWithDraw)/100
+        dataAnalysis[5].value = (data.totalRevenue)/100
+      })
+    },
+    deviceLocationGraph(){
+      deviceLocationGraph().then(res=>{
+        const data = res.data
+        let datas = []
+        for(var i = 0;i<data.length;i++){
+          datas.push({
+            name:data[i].location,
+            value:data[i].locationNum
+          })
+        }
+        this.kanbanData.图表展示.设备分析[0].options.series[0].data = datas
+      })
+    },
+    revenueGraph(){
+      revenueGraph().then(res=>{
+        const data = res.data
+        let data1 = []    //时间
+        let data2 = []    //金额
+        for(var i = 0;i<data.length;i++){
+          data1.push(data[i].times)
+          data2.push((data[i].revenueNum)/100)
+        }
+        const revenueNum = this.kanbanData.图表展示.设备分析[1].options
+        revenueNum.xAxis.data = data1
+        revenueNum.series[0].data = data2
+        revenueNum.series[1].data = data2
+      })
+    },
+    sellGraph(){
+      sellGraph().then(res=>{
+        const data = res.data
+        let data1 = []    //时间
+        let data2 = []    //设备数
+        for(var i = 0;i<data.length;i++){
+          data1.push(data[i].times)
+          data2.push(data[i].deviceBuyNum)
+        }
+        const revenueNum = this.kanbanData.图表展示.设备分析[2].options
+        revenueNum.xAxis.data = data1
+        revenueNum.series[0].data = data2
+        revenueNum.series[1].data = data2
+
+      })
+    },
+    userCountGraph(){
+      userCountGraph().then(res=>{
+        const data = res.data
+        let data1 = []    //时间
+        let data2 = []    //用户数
+        for(var i = 0;i<data.length;i++){
+          data1.push(data[i].times)
+          data2.push(data[i].userNum)
+        }
+        const revenueNum = this.kanbanData.图表展示.设备分析[3].options
+        revenueNum.xAxis.data = data1
+        revenueNum.series[0].data = data2
+        revenueNum.series[1].data = data2
+      })
+    },
+
     init() {
       this.selectCustomerUserCount()
       this.selectDeviceCount()
       this.modelPercent()
       this.newDeviceCountOfToday()
-      this.queryHomePageStatistic()
       this.selectLiveCustomerUserCountPerHour()
       this.deviceLocationCount()
     },
@@ -145,39 +245,6 @@ export default {
         this.kanbanData = realData
         this.init()
       }
-    },
-    queryHomePageStatistic() {
-      // 查询首页数据
-      queryHomePageStatistic().then(res => {
-        const data = res.data
-        const dataAnalysis = this.kanbanData.数据展示.设备分析
-        dataAnalysis[0].value = data.deviceTotalCount
-        dataAnalysis[1].value = data.todayDeviceAddCount
-        dataAnalysis[2].value = data.todayDeviceOrderCount
-        dataAnalysis[3].value = data.todayDeviceBugCount
-
-        const userAnalysis = this.kanbanData.数据展示.用户分析
-        userAnalysis[0].value = data.totalUserCount
-        userAnalysis[1].value = data.preDayUserAddCount
-        userAnalysis[2].value = data.todayUserLiveCount
-
-        const orderAnalysis = this.kanbanData.数据展示.订单分析
-        orderAnalysis[0].value = data.todayOrderCount
-
-        const environmentAnalysis = this.kanbanData.数据展示.环境分析
-        environmentAnalysis[0].value = data.totalPMCount
-        environmentAnalysis[1].value = data.envPercent
-
-        const alarmAnalysis = this.kanbanData.数据展示.告警分析
-        alarmAnalysis[0].value = data.nowDeviceAlarmCount
-
-        const profitAnalysis = this.kanbanData.数据展示.分润分析
-        profitAnalysis[0].value = data.todayReceiveBillCount
-
-        const chart = this.kanbanData.图表展示.设备分析
-        chart[2].options.series[0].data[0].value = data.deviceOnlineCount
-        chart[2].options.series[0].data[1].value = data.deviceOfflineCount
-      })
     },
     // 每月新增用户统计
     selectCustomerUserCount() {

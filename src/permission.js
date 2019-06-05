@@ -8,22 +8,25 @@ NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
 // permission judge function
 function hasPermission(permission, permissionRoles) {
+  // console.log(permission, permissionRoles)
   if (permission.indexOf('admin') >= 0) return true // admin permission passed directly
   if (!permissionRoles) return true
   return permission.some(role => permissionRoles.indexOf(role) >= 0)
 }
-console.log(window.location.host)
+// console.log(window.location.host)
 const whiteList = ['/login', '/authredirect','/merge',] // no redirect whitelist
 
 router.beforeEach((to, from, next) => {
   NProgress.start() // start progress bar
+  // alert(getToken())
   if (getToken()) {
     // determine if there has token
     /* has token*/
-    if (to.path === '/login') {
+    if (to.path === '/merge') {
       next({ path: '/' })
       NProgress.done() // if current page is dashboard will not trigger	afterEach hook, so manually handle it
     } else {
+      // console.log(store.getters.permission,2)
       if (store.getters.permission.length === 0) {
         const permissions = JSON.parse(
           window.localStorage.getItem('permission')
@@ -50,7 +53,7 @@ router.beforeEach((to, from, next) => {
       // 在免登录白名单，直接进入
       next()
     } else {
-      next('/login') // 否则全部重定向到登录页
+      next('/merge') // 否则全部重定向到登录页
       NProgress.done() // if current page is login will not trigger afterEach hook, so manually handle it
     }
   }

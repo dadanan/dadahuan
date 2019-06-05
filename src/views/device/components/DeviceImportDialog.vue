@@ -12,45 +12,16 @@
         </el-form-item>
       </el-form>
     </div>
-    <el-table
-      :data="importList"
-      style="width: 100%" class="mb20" border @selection-change="handleSelectionChange">
+    <el-table :data="importList" style="width: 100%" class="mb20" border @selection-change="handleSelectionChange">
       <el-table-column type="selection"></el-table-column>
       <el-table-column type="index"></el-table-column>
-      <el-table-column
-        prop="name"
-        label="名称" show-overflow-tooltip sortable>
+      <el-table-column prop="name" label="名称" show-overflow-tooltip sortable>
       </el-table-column>
-      <el-table-column
-        prop="type"
-        label="型号" show-overflow-tooltip sortable>
+      <el-table-column prop="modelId" label="设备类型" show-overflow-tooltip sortable>
       </el-table-column>
-      <el-table-column
-        prop="typeID"
-        label="类型ID" show-overflow-tooltip sortable>
-      </el-table-column>
-      <el-table-column
-        prop="mac"
-        label="MAC" show-overflow-tooltip sortable>
-      </el-table-column>
-      <el-table-column
-        prop="productDatetime"
-        label="生产日期" show-overflow-tooltip sortable>
-      </el-table-column>
-      <el-table-column
-        prop="version"
-        label="硬件版本" show-overflow-tooltip sortable>
+      <el-table-column prop="deviceNo" label="MAC" show-overflow-tooltip sortable>
       </el-table-column>
     </el-table>
-    <el-form>
-      <el-form-item label="导入备注">
-        <el-input
-          type="textarea"
-          :autosize="{ minRows: 4, maxRows: 4}"
-          v-model="description">
-        </el-input>
-      </el-form-item>
-    </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="$emit('update:visible', false)">取消</el-button>
       <el-button type="primary" @click="handleImportPart">导入选中项</el-button>
@@ -61,16 +32,9 @@
 
 <script>
 import XLSX from '@/assets/xlsx/xlsx.core.min.js'
-import { createDevice } from '@/api/device/list'
+import { addList } from '@/api/zulin'
 
-const tabelProps = [
-  'name',
-  'type',
-  'typeID',
-  'mac',
-  'productDatetime',
-  'hardVersion'
-]
+const tabelProps = []
 
 export default {
   props: {
@@ -93,6 +57,7 @@ export default {
     //   })
     // }
     return {
+      value:'',
       file: '',
       description: '',
       importList: [],
@@ -114,21 +79,31 @@ export default {
       this.createDevice(this.importList)
     },
     createDevice(data) {
-      const list = [...data]
-      list.forEach(item => {
-        item.birthTime = +new Date()
-      })
-      const form = {
-        deviceList: list
-      }
-      createDevice(form)
-        .then(res => {
-          form.deviceList.forEach((item, index) => {
-            item.id = res.data[index].deviceId
+      addList({'deviceReqList':data}).then(res=>{
+        this.$emit('update:visible', false)
+        if(res.data){
+          this.$message({
+            message: '添加设备成功！',
+            type: 'success'
           })
-          this.$emit('update:visible', false)
-          this.$emit('add-data', form)
-        })
+          this.$emit('add-data', data)
+        }
+      })
+      // const list = [...data]
+      // list.forEach(item => {
+      //   item.birthTime = +new Date()
+      // })
+      // const form = {
+      //   deviceList: list
+      // }
+      // createDevice(form)
+      //   .then(res => {
+      //     form.deviceList.forEach((item, index) => {
+      //       item.id = res.data[index].deviceId
+      //     })
+      //     this.$emit('update:visible', false)
+      //     this.$emit('add-data', form)
+      //   })
     },
     handleExcelChange(e) {
       const file = e.target.files[0]
@@ -146,11 +121,11 @@ export default {
           workbook = XLSX.read(data, {
             type: 'binary'
           }) // 以二进制流方式读取得到整份excel表格对象
+
         } catch (e) {
           this.$message.error('文件类型不正确')
           return
         }
-
         let fromTo = ''
         // 遍历每张表读取
         for (let sheet in workbook.Sheets) {
@@ -162,9 +137,7 @@ export default {
             break // 只取第一张表
           }
         }
-
         if (!devices.length) return
-
         // 确保每个key都存在并去掉不需要的key
         // 暂不考虑必填项
         devices.map(v => {
@@ -174,7 +147,16 @@ export default {
           })
         })
 
-        this.importList = devices
+        // this.importList = devices
+        const list = devices
+        // console.log(this.importList)
+        for(var i = 0;i<list.length;i++){
+          this.importList.push({
+            name:list[i].名称,
+            modelId:list[i].设备类型,
+            deviceNo:list[i].MAC
+          })
+        }
       }
 
       this.file = file.name

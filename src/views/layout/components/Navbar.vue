@@ -2,7 +2,7 @@
   <div>
     <el-menu class="navbar" mode="horizontal">
       <hamburger :toggleClick="toggleSideBar" :isActive="sidebar.opened" class="sidebar-btn"></hamburger>
-      <div class="search">
+      <!-- <div class="search">
         <div class="search__label">设备选择：</div>
         <el-select v-model='filterKey' @change='filterOptionChanged' placeholder="请选择查询条件">
           <el-option v-for='item in filterData' :key='item.value' :label="item.label" :value="item.value"></el-option>
@@ -16,40 +16,51 @@
           </el-select>
           <el-button slot="append" icon="el-icon-search" @click='searchDevice'></el-button>
         </template>
-      </div>
+      </div> -->
       <div style="flex: 1"></div>
+      <!-- <div class="profile">
+        <font-awesome-icon icon="expand"></font-awesome-icon>
+        消息中心
+      </div> -->
+      <!-- <div class="profile" @click="bigPictureMode">
+        <font-awesome-icon icon="expand"></font-awesome-icon>
+        大数据模式
+      </div> -->
       <el-dropdown>
         <div class="profile">
           <font-awesome-icon icon="user"></font-awesome-icon>
-          {{profileForm.nickName}}
+          {{profileForm.name}}
         </div>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item>
             <span @click="dialogEditProfileVisible = true" style="display: block">个人设置</span>
           </el-dropdown-item>
           <el-dropdown-item divided>
+            <span @click="dialogEditProfileVisibles = true" style="display: block">修改密码</span>
+          </el-dropdown-item>
+          <el-dropdown-item divided>
             <span @click="logout" style="display:block;">{{$t('navbar.logOut')}}</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      <div class="profile" @click="bigPictureMode">
-        <font-awesome-icon icon="expand"></font-awesome-icon>
-        大数据模式
+      <div class="profile">
+        <!-- <font-awesome-icon icon="expand"></font-awesome-icon>   -->
+        <!-- 消息中心 -->
       </div>
     </el-menu>
     <el-dialog top='4vh' :close-on-click-modal=false title="个人设置" :visible.sync="dialogEditProfileVisible">
       <el-form :rules="rules" :model="profileForm" ref='form' label-width="80px" label-position="left">
         <el-form-item label="账号">
-          <el-input v-model="profileForm.userName" :disabled="true"></el-input>
+          <el-input v-model="profileForm.registerNo" :disabled="true"></el-input>
         </el-form-item>
-        <el-form-item label="昵称" prop="nickName">
-          <el-input v-model="profileForm.nickName"></el-input>
+        <el-form-item label="昵称" prop="name">
+          <el-input v-model="profileForm.name"></el-input>
         </el-form-item>
         <el-form-item label="角色类型">
           <el-input v-model="profileForm.roleName" :disabled="true"></el-input>
         </el-form-item>
         <el-form-item label="手机" prop='telephone'>
-          <el-input type='number' v-model="profileForm.telephone"></el-input>
+          <el-input type='mobileNo' v-model="profileForm.mobileNo"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -57,6 +68,22 @@
         <el-button type="primary" @click="updateUser">确定</el-button>
       </div>
     </el-dialog>
+    <!-- 修改密码 -->
+    <el-dialog top='4vh' :close-on-click-modal=false title="个人设置" :visible.sync="dialogEditProfileVisibles">
+      <el-form :rules="rules" label-width="120px" label-position="left">
+        <el-form-item label="密码">
+          <el-input v-model="passWord"></el-input>
+        </el-form-item>
+        <el-form-item label="在输入一次">
+          <el-input v-model="passWords"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogEditProfileVisibles = false">取消</el-button>
+        <el-button type="primary" @click="editMyPassword">确定</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -69,7 +96,7 @@ import Screenfull from '@/components/Screenfull'
 import LangSelect from '@/components/LangSelect'
 import ThemePicker from '@/components/ThemePicker'
 import * as screenfull from 'screenfull'
-import { getCurrentUser, updateUser } from '@/api/user'
+import { getCurrentUser, updateUser ,editMyPassword } from '@/api/user'
 import { selectBackendConfigBySLD } from '@/api/customer'
 
 export default {
@@ -86,6 +113,9 @@ export default {
   },
   data() {
     return {
+      passWord:'',
+      passWords:'',
+      dialogEditProfileVisibles:false,
       filterData: [
         {
           label: '分配状态',
@@ -183,7 +213,7 @@ export default {
       dialogEditProfileVisible: false,
       profileForm: {},
       rules: {
-        nickName: [
+        name: [
           { max: 15, message: '最大长度为15个字符', trigger: 'blur' },
           { required: true, message: '请输入昵称', trigger: 'blur' }
         ],
@@ -199,6 +229,31 @@ export default {
     }
   },
   methods: {
+    // 修改密码
+    editMyPassword(){
+      if(this.passWord == this.passWords){
+        editMyPassword({password:this.passWord}).then(res=>{
+          if (res.code === 200) {
+              this.$message({
+                  type: 'success',
+                  message: '修改密码成功!'
+                })
+              this.dialogEditProfileVisibles = false
+            } else {
+              this.$message({
+                type: 'error',
+                message: res.msg
+              })
+            }
+        })
+      }else{
+        this.$message({
+          type: 'error',
+          message: '两次密码不一致，请从先填写!'
+        })
+      }
+
+    },
     filterOptionChanged(value) {
       const data = this.filterData.filter(item => item.value === value)[0]
       const type = data.type
@@ -238,10 +293,8 @@ export default {
     updateUser() {
       this.$refs.form.validate(valid => {
         if (valid) {
-          updateUser({
-            ...this.profileForm,
-            lastUpdateTime: new Date().toISOString()
-          }).then(res => {
+          updateUser(this.profileForm
+          ).then(res => {
             if (res.code === 200) {
               this.$message({
                 type: 'success',
@@ -266,6 +319,7 @@ export default {
     getUserInfo() {
       getCurrentUser().then(res => {
         if (res.code === 200) {
+          // console.log(res.data)
           const data = res.data
           this.profileForm = data
           this.$store.commit('SET_USER', data)
@@ -289,7 +343,7 @@ export default {
   },
   created() {
     this.getUserInfo()
-    this.selectBackendConfigBySLD()
+    // this.selectBackendConfigBySLD()
   }
 }
 </script>

@@ -3,88 +3,50 @@
     <div class="flex mb20">
       <div class="flex-item flex-item--full">
         <el-card class="el-card--solid">
-          <el-form label-width="100px" label-position="left">
+          <el-form label-width="110px" label-position="left">
             <el-row :gutter="20">
               <el-col :span="12">
-                <el-form-item label="名称 :">
+                <el-form-item label="设备mac :">
+                  {{form.deviceNo}}
+                </el-form-item>
+                <el-form-item label="设备型号 :">
+                  {{form.modelName}}
+                </el-form-item>
+                <el-form-item label="设备名称 :">
                   {{form.name}}
                 </el-form-item>
-                <el-form-item label="MAC :">
-                  {{form.mac}}
-                </el-form-item>
-                <el-form-item label="设备归属 :">
-                  {{form.customerName}}
-                </el-form-item>
-                <el-form-item label="分配状态 :">
-                  {{form.assignStatus === 1 ? '已分配' : '未分配'}}
-                </el-form-item>
-                <el-form-item label="绑定状态 :">
-                  {{form.bindStatus === 1 ? '已绑定' : '未绑定'}}
-                </el-form-item>
-                <!-- <el-form-item label="启用状态">
-                  {{form.enableStatus === 1 ? '启用' : '禁用'}}
-                </el-form-item> -->
-                <el-form-item label="项目名 :">
-                  {{form.groupName}}
-                </el-form-item>
-                <el-form-item label="管理名称 :">
-                  {{form.manageName}}
+                <el-form-item label="设备序列号 :">
+                  {{form.modelNo}}
                 </el-form-item>
                 <el-form-item label="在线状态 :">
-                  {{form.onlineStatus === 1 ? '在线' : '离线'}}
+                  {{form.onlineStatus === 1 ? '在线' : '关闭'}}
                 </el-form-item>
                 <el-form-item label="工作状态 :">
-                  <template v-if='form.onlineStatus'>
-                    {{form.powerStatus === 1 ? '开机' : '关机'}}
-                  </template>
-                  <template v-else>
-                    - -
-                  </template>
+                  {{form.workStatus === 1 ? '开启' : '关闭'}}
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item label="创建人 :">
-                  {{form.createUserName}}
-                </el-form-item>
-                <el-form-item label="modelNo :">
-                  {{form.modelNo}}
-                </el-form-item>
-                <el-form-item label="型号名称 :">
-                  {{form.modelName}}
-                </el-form-item>
-                <el-form-item label="型号 :">
-                  {{form.modelCode}}
-                </el-form-item>
-                <el-form-item label="类型名称 :">
-                  {{form.deviceType}}
-                </el-form-item>
-                <el-form-item label="typeNo :">
-                  {{form.typeNo}}
-                </el-form-item>
-                <el-form-item label="项目ID :">
-                  <template v-if='form.groupId > 0'>
-                    {{form.groupId}}
+                <el-form-item label="激活时间 :">
+                  <template v-if="form.activeTime">
+                    {{new Date(form.activeTime).toLocaleString()}}
                   </template>
                   <template v-else>
-                    {{form.group}}
+                    --
                   </template>
                 </el-form-item>
-                <el-form-item label="注册时间 :">
-                  {{new Date(form.birthTime).toLocaleString()}}
-                </el-form-item>
-                <el-form-item label="最后上线时间">
-                  <template v-if='form.lastUpdateTime'>
-                    {{new Date(form.lastUpdateTime).toLocaleString()}}
+                <el-form-item label="最后上线时间 :">
+                  <template v-if="form.activeTime">
+                    {{new Date(form.activeTime).toLocaleString()}}
                   </template>
                   <template v-else>
-                    - -
+                    --
                   </template>
                 </el-form-item>
-                <el-form-item label="设备位置 :" v-if="form.location">
-                  <!-- {{((form.location).split(","))[3]}} -->
-                  <el-input v-model="location" @blur="blur"></el-input>
+                <el-form-item label="设备位置 :">
+                  <el-input v-model="form.location"  disabled></el-input>
                 </el-form-item>
-                <el-form-item label="设备位置 :" v-else>
+                <el-form-item label="备注信息 :">
+                  <el-input type="textarea" :rows="4" placeholder="请输入内容" v-model="form.description"></el-input>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -93,102 +55,158 @@
       </div>
       <div class="flex-item">
         <el-card class="el-card--solid map-container">
-          <a-map :gps='detailData && detailData.mapGps' @getLocation='getLocation'></a-map>
+          <a-map :gps='form && form.gpsMap' @getLocation='getLocation'></a-map>
         </el-card>
       </div>
     </div>
     <el-tabs v-model="activeTab" type="card">
-      <el-tab-pane label="设备操作" name="1">
-        <operation :detailData='detailData'></operation>
+      <el-tab-pane label="运营信息" name="1">
+        <el-form label-width="110px" label-position="left">
+            <el-row :gutter="20">
+              <el-col :span="5">
+                <el-form-item label="收费规则 :">
+                  {{operation.productDetail}}
+                </el-form-item>
+                <el-form-item label="场所名称 :">
+                  {{operation.groundName}}
+                </el-form-item>
+                <el-form-item label="设备主 :">
+                  {{operation.investRegisterName}}
+                </el-form-item>
+              </el-col>
+              <el-col :span="5">
+                <el-form-item label="收费类别 :">
+                  {{operation.productRuleIds}}
+                </el-form-item>
+                <el-form-item label="场所地址 :">
+                  {{operation.gpsMap}}
+                </el-form-item>
+                <el-form-item label="设备主电话 :">
+                  {{operation.investMobile}}
+                </el-form-item>
+              </el-col>
+              <el-col :span="5">
+                <el-form-item label="收费价格 :">
+                  {{operation.productDetailPrice}}
+                </el-form-item>
+                <el-form-item label="场所负责人 :">
+                  {{operation.groundRegisterName}}
+                </el-form-item>
+              </el-col>
+              <el-col :span="5">
+                <el-form-item label="设备归属 :">
+                  {{operation.activeTime}}
+                </el-form-item>
+                <el-form-item label="场地主电话 :">
+                  {{operation.groundMobile}}
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
       </el-tab-pane>
-      <el-tab-pane label="设备数据" name="2">
-        <el-table style="width: 100%" border :data="deviceList1">
+      <el-tab-pane label="设备控制" name="2">
+        <el-form label-width="110px" label-position="left">
+          <el-row :gutter="20">
+            <el-col :span="8">  
+              <el-form-item label="设备控制 :">
+                <el-switch v-model="control" active-text="开启" inactive-text="关闭" @change="controls">
+                </el-switch>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </el-tab-pane>
+      <el-tab-pane label="订单列表" name="3">
+        <el-table style="width: 100%" border :data="deviceWorkLog" height="250px">
           <el-table-column type="index"></el-table-column>
-          <!-- <el-table-column prop="name" label="设备管理名"  show-overflow-tooltip sortable>
-          </el-table-column> -->
-          <el-table-column prop="co2" label="co2" v-if="deviceModelAbility.co2" show-overflow-tooltip sortable>
+          <el-table-column prop="orderNo" label="订单编号" show-overflow-tooltip sortable>
+            <!-- <template slot-scope="scope">
+              {{new Date(scope.row.createTime).toLocaleString()}}
+            </template> -->
           </el-table-column>
-          <el-table-column prop="hcho" label="甲醛" v-if="deviceModelAbility.hcho" show-overflow-tooltip sortable>
+          <el-table-column prop="userName" label="用户昵称" show-overflow-tooltip sortable>
           </el-table-column>
-          <el-table-column prop="hum" label="湿度" v-if="deviceModelAbility.hum" show-overflow-tooltip sortable>
+          <el-table-column prop="openId" label="用户openid" show-overflow-tooltip sortable>
           </el-table-column>
-          <el-table-column prop="pm" label="PM2.5" v-if="deviceModelAbility.pm25" show-overflow-tooltip sortable>
+          <el-table-column prop="groundName" label="场所" show-overflow-tooltip sortable>
           </el-table-column>
-          <el-table-column prop="tem" label="温度" v-if="deviceModelAbility.temp" show-overflow-tooltip sortable>
+          <el-table-column prop="productRuleId" label="收费规则" show-overflow-tooltip sortable>
           </el-table-column>
-          <el-table-column prop="tvoc" label="tvoc" v-if="deviceModelAbility.tvoc" show-overflow-tooltip sortable>
+          <el-table-column prop="orderAmt" label="订单金额" show-overflow-tooltip sortable>
+            <template slot-scope="orderAmt">
+              {{(scope.row.orderAmt)/100}}
+            </template>
           </el-table-column>
-          <el-table-column prop="startTime" label="状态时间" show-overflow-tooltip sortable>
+          <el-table-column prop="orderResult" label="订单状态" show-overflow-tooltip sortable>
             <template slot-scope="scope">
-              {{new Date(scope.row.startTime).toLocaleString()}}
+              <template v-if="scope.row.orderResult == 'SplitFail'">
+                订单结束
+              </template>
+              <template v-if="scope.row.orderResult == 'PayClose'">
+                支付关闭
+              </template>
+              <template v-if="scope.row.orderResult == 'SplitSucc'">
+                已完成
+              </template>
+              <template v-if="scope.row.orderResult == 'PaySucc'">
+                支付成功
+              </template>
+            </template>
+          </el-table-column>
+          <el-table-column prop="source" label="支付方式" show-overflow-tooltip sortable>
+            <template slot-scope="scope">
+            <template v-if="scope.row.source == '1'">
+              微信支付
+            </template>
+            <template v-else-if="scope.row.source == '2'">
+               余额支付
+            </template>
+            <template v-else-if="scope.row.source == '3'">
+               线下支付
+            </template>
+          </template>
+          </el-table-column>
+          <el-table-column prop="orderTime" label="订单时间" show-overflow-tooltip sortable>
+            <template slot-scope="scope">
+              <template v-if="scope.row.orderTime">
+                {{new Date(scope.row.orderTime).toLocaleString()}}
+              </template>
+              <template v-else>
+                --
+              </template>
             </template>
           </el-table-column>
         </el-table>
-        <el-pagination :current-page="queryDevice.page" :page-sizes="[50,100,200,300]" :page-size="queryDevice.limit" layout="total, sizes, prev, pager, next, jumper" :total="queryDeviceSensorStatCound" @size-change="handleSizeChange" @current-change="handleCurrentChange">
-        </el-pagination>
       </el-tab-pane>
-      <el-tab-pane label="工作日志" name="3">
-        <el-table style="width: 100%" border :data="deviceWorkLog">
+      <el-tab-pane label="运行日志" name="4">
+        <el-table style="width: 100%" border :data="runLists" height="250px">
           <el-table-column type="index"></el-table-column>
+          <el-table-column prop="content" label="状态" show-overflow-tooltip sortable>
+          </el-table-column>
           <el-table-column prop="createTime" label="时间" show-overflow-tooltip sortable>
             <template slot-scope="scope">
               {{new Date(scope.row.createTime).toLocaleString()}}
             </template>
           </el-table-column>
-          <el-table-column prop="deviceStatus" label="状态" show-overflow-tooltip sortable>
+          <el-table-column label="设备故障" show-overflow-tooltip sortable>
           </el-table-column>
         </el-table>
-        <el-pagination :current-page="queryDeviceW.page" :page-sizes="[50,100,200,300]" :page-size="queryDeviceW.limit" layout="total, sizes, prev, pager, next, jumper" :total="deviceWorkLogCound" @size-change="handleSizeChange3" @current-change="handleCurrentChange3">
-        </el-pagination>
       </el-tab-pane>
-      <el-tab-pane label="操作日志" name="4">
-        <el-table style="width: 100%" border :data="deviceList">
+      <el-tab-pane label="告警记录" name="5">
+        <el-table style="width: 100%" border :data="deviceListJ" height="250px">
           <el-table-column type="index"></el-table-column>
-          <el-table-column prop="funcId" label="指令ID" show-overflow-tooltip sortable>
+          <el-table-column prop="id" label="序号" show-overflow-tooltip sortable>
           </el-table-column>
-          <el-table-column prop="funcName" label="操作指令" show-overflow-tooltip sortable>
-          </el-table-column>
-          <el-table-column prop="opertye" label="操作来源" :formatter="opertye" show-overflow-tooltip sortable>
-          </el-table-column>
-          <el-table-column prop="funcValue" label="操作值" show-overflow-tooltip sortable>
-          </el-table-column>
-          <el-table-column prop="operName" label="修改人" show-overflow-tooltip sortable>
-          </el-table-column>
-          <el-table-column prop="operateTime" label="操作时间" show-overflow-tooltip sortable>
+          <el-table-column prop="createTime" label="告警时间" show-overflow-tooltip sortable>
             <template slot-scope="scope">
-              {{new Date(scope.row.operateTime).toLocaleString()}}
+              {{new Date(scope.row.createTime).toLocaleString()}}
             </template>
           </el-table-column>
-          <el-table-column prop="responseTime" label="响应时间" show-overflow-tooltip sortable>
-            <template slot-scope="scope">
-              <template v-if='scope.row.responseTime'>
-                {{new Date(scope.row.responseTime).toLocaleString()}}
-              </template>
-              <template v-else>
-                - -
-              </template>
-            </template>
+          <el-table-column prop="content" label="告警内容" show-overflow-tooltip sortable>
+          </el-table-column>
+          <el-table-column label="告警等级" show-overflow-tooltip sortable>
           </el-table-column>
         </el-table>
-        <el-pagination :current-page="queryOperLog.page" :page-sizes="[50,100,200,300]" :page-size="queryOperLog.limit" layout="total, sizes, prev, pager, next, jumper" :total="queryOperLogCound" @size-change="handleSizeChange1" @current-change="handleCurrentChange1">
-        </el-pagination>
-      </el-tab-pane>
-      <el-tab-pane label="设备告警" name="5">
-        <el-table style="width: 100%" border :data="deviceListJ">
-          <el-table-column type="index"></el-table-column>序号、告警时间、告警内容、告警等级、状态
-          <el-table-column prop="name" label="序号" show-overflow-tooltip sortable>
-          </el-table-column>
-          <el-table-column prop="name" label="告警时间" show-overflow-tooltip sortable>
-          </el-table-column>
-          <el-table-column prop="name" label="告警内容" show-overflow-tooltip sortable>
-          </el-table-column>
-          <el-table-column prop="name" label="告警等级" show-overflow-tooltip sortable>
-          </el-table-column>
-          <el-table-column prop="name" label="状态" show-overflow-tooltip sortable>
-          </el-table-column>
-        </el-table>
-        <el-pagination :current-page="0" :page-sizes="[50,100,200,300]" :page-size="1" layout="total, sizes, prev, pager, next, jumper" :total="0" @size-change="handleSizeChange1" @current-change="handleCurrentChange1">
-        </el-pagination>
       </el-tab-pane>
     </el-tabs>
   </el-dialog>
@@ -198,13 +216,16 @@
 import Operation from './deviceDetail/Operation'
 import AMap from './deviceDetail/AMap'
 import ShareList from './deviceDetail/ShareList'
-import { selectById } from '@/api/device/model'
+import { 
+  operationMsg,   // 设备运营信息
+  orderList,      // 设备订单列表 
+  runLog,         // 设备运行日志
+  warnLog,
+  sendFunc
+} from '@/api/zulin'
 import {
-  queryOperLog, //操作日志
-  queryDeviceSensorStat, //查看设备数据
   updateDevice, //地理位置
-  shareDeviceToken, //分享设备的token
-  queryDeviceWorkLog // 工作日志
+  // queryDeviceWorkLog // 工作日志
 } from '@/api/device/list'
 import VueQrcode from '@chenfengyuan/vue-qrcode'
 
@@ -220,6 +241,18 @@ export default {
   },
   data() {
     return {
+      orderl:{
+        length: 50,
+        page: 1
+      },
+      control:false,
+      runl:{
+        length: 50,
+        page: 1
+      },
+      operation:{},
+      runLists:[],
+
       selected: [],
       placeholder: 'placeholder',
       activeTab: '1',
@@ -239,6 +272,10 @@ export default {
         limit: 50,
         page: 1
       },
+      deviceWarn: {
+        length: 10000,
+        page: 1
+      },
       deviceList1: [],
       deviceWorkLog: [],
       shareURL: '...',
@@ -251,14 +288,6 @@ export default {
       group: '--',
       location:'',
       deviceModelAbilitys: [],
-      deviceModelAbility: {
-        co2: false,
-        tvoc: false,
-        temp: false,
-        hum: false,
-        pm25: false,
-        hcho: false
-      }
     }
   },
   watch: {
@@ -268,10 +297,30 @@ export default {
       }
       this.init(val)
       this.valId = val.id
-      this.selectById(val.modelId)
     }
   },
   methods: {
+    controls(val){
+      console.log(val)
+      let vals = 0
+      if(val){
+        vals = 1
+      }else{
+        vals = 0
+      }
+      sendFunc({
+        deviceId:this.form.id,
+        funcId:'210',
+        funcValue:vals
+      }).then(res=>{
+        if(res.data){
+          this.$message({
+            message: '指令发送成功',
+            type: 'success'
+          })
+        }
+      })
+    },
     opertye(row) {
       let opertye = row.operType
       if (opertye == 1) {
@@ -282,41 +331,9 @@ export default {
         return '管理端'
       }
     },
-    selectById(id) {
-      selectById(id).then(res => {
-        this.deviceModelAbilitys = res.data.deviceModelAbilitys
-        for(var i = 0;i<this.deviceModelAbilitys.length;i++){
-          if(this.deviceModelAbilitys[i].dirValue == 120){
-            if(this.deviceModelAbilitys[i].status == 1){
-              this.deviceModelAbility.co2 = true 
-            }
-          }
-          if (this.deviceModelAbilitys[i].dirValue == 150) {
-            if (this.deviceModelAbilitys[i].status == 1) {
-              this.deviceModelAbility.tvoc = true
-            }
-          }
-          if (this.deviceModelAbilitys[i].dirValue == 140) {
-            if (this.deviceModelAbilitys[i].status == 1) {
-              this.deviceModelAbility.temp = true
-            }
-          }
-          if (this.deviceModelAbilitys[i].dirValue == 130) {
-            if (this.deviceModelAbilitys[i].status == 1) {
-              this.deviceModelAbility.hum = true
-            }
-          }
-          if (this.deviceModelAbilitys[i].dirValue == 110) {
-            if (this.deviceModelAbilitys[i].status == 1) {
-              this.deviceModelAbility.pm25 = true
-            }
-          }
-          if (this.deviceModelAbilitys[i].dirValue == 160) {
-            if (this.deviceModelAbilitys[i].status == 1) {
-              this.deviceModelAbility.hcho = true
-            }
-          }
-        }
+    warnLog(val){
+      warnLog(val,this.deviceWarn).then(res=>{
+        this.deviceListJ = res.data
       })
     },
     blur(){
@@ -340,71 +357,47 @@ export default {
     },
     init(val) {
       this.form = JSON.parse(JSON.stringify(val))
-      console.log(this.form)
-      this.queryOperLog(val.id)
-      this.queryDeviceSensorStat(val.id)
-      // this.getShareToken()
-      this.queryDeviceWorkLog(val.id)
+      // console.log(this.form)
+      this.operationMsg(val.deviceNo)
+      this.orderList(val.deviceNo)
+      this.runLog(val.deviceNo)
+      this.warnLog(val.deviceNo)
+
+
+    },
+    runLog(val){
+      runLog(val,this.runl).then(res=>{
+        // console.log(res.data)
+        this.runLists = res.data
+      })
+    },
+    orderList(val){
+      orderList(val,this.orderl).then(res=>{
+        // console.log(res.data)
+        this.deviceWorkLog = res.data
+      })
+    },
+    operationMsg(val){
+      operationMsg(val).then(res=>{
+        // console.log(res.data)
+        this.operation = res.data
+      })
     },
     getLocation({ gps, location }) {
-      updateDevice({
-        id: this.form.id,
-        location,
-        mapGps: gps.toString()
-      }).then(() => {
-        this.$message({
-          message: '设备位置信息更新成功！',
-          type: 'success'
-        })
-        this.form.location = location
-        this.location = (this.form.location).split(",")[3]
-      })
-    },
-    // 工作日志
-    queryDeviceWorkLog(id) {
-      queryDeviceWorkLog({
-        limit: this.queryDeviceW.limit,
-        page: this.queryDeviceW.page,
-        deviceId: id
-      }).then(res => {
-        if(!res.data || !res.data.dataList){
-          return
-        }
-        this.deviceWorkLog = res.data.dataList
-        this.deviceWorkLogCound = res.data.totalCount
-      })
-    },
-    // 操作日志
-    queryOperLog(id) {
-      queryOperLog({
-        limit: this.queryOperLogc.limit,
-        page: this.queryOperLogc.page,
-        deviceId: id
-      }).then(res => {
-        if(!res.data || !res.data.dataList){
-          return
-        }
-        this.deviceList = res.data.dataList
-        this.queryOperLogCound = res.data.totalCount
-      })
-    },
-    // 设备数据
-    queryDeviceSensorStat(id) {
-      queryDeviceSensorStat({
-        limit: this.queryDevice.limit,
-        page: this.queryDevice.page,
-        deviceId: id
-      }).then(res => {
-        if(!res.data || !res.data.dataList){
-          return
-        }
-        this.deviceList1 = res.data.dataList
-        for (var i = 0; i < this.deviceList1.length; i++) {
-          this.deviceList1[i].hcho = this.deviceList1[i].hcho / 100
-          this.deviceList1[i].tvoc = this.deviceList1[i].tvoc / 100
-        }
-        this.queryDeviceSensorStatCound = res.data.totalCount
-      })
+      this.form.gpsMap = gps
+      this.form.location = location
+      // updateDevice({
+      //   id: this.form.id,
+      //   location,
+      //   mapGps: gps.toString()
+      // }).then(() => {
+      //   this.$message({
+      //     message: '设备位置信息更新成功！',
+      //     type: 'success'
+      //   })
+      //   this.form.location = location
+      //   this.location = (this.form.location).split(",")[3]
+      // })
     },
     getSld() {
       // 获取二级域名
@@ -414,48 +407,27 @@ export default {
       }
       return ''
     },
-    isDev() {
-      // 是开发环境？
-      const sld = this.getSld()
-      return sld === '' || sld === 'dev'
-    },
-    getShareToken() {
-      shareDeviceToken(this.form.wxDeviceId).then(res => {
-        const form = this.form
-
-        const url = `http://${
-          this.isDev() ? 'dev' : form.sld
-        }.hcocloud.com/h5/init?masterOpenId=${form.userOpenId}&deviceId=${
-          form.id
-        }&token=${res.data}&customerId=${form.customerId}`
-
-        // console.log('分享URL: ', url)
-        this.shareURL = url
-      })
-    },
     handleSizeChange(val) {
       this.queryDevice.limit = val
-      this.queryDeviceSensorStat(this.valId)
     },
     handleCurrentChange(val) {
       this.queryDevice.page = val
-      this.queryDeviceSensorStat(this.valId)
     },
     handleSizeChange1(val) {
       this.queryOperLogc.limit = val
-      this.queryOperLog(this.valId)
+      // this.queryOperLog(this.valId)
     },
     handleCurrentChange1(val) {
       this.queryOperLogc.page = val
-      this.queryOperLog(this.valId)
+      // this.queryOperLog(this.valId)
     },
     handleSizeChange3(val) {
       this.queryDeviceW.limit = val
-      this.queryDeviceWorkLog(this.valId)
+      // this.queryDeviceWorkLog(this.valId)
     },
     handleCurrentChange3(val) {
       this.queryDeviceW.page = val
-      this.queryDeviceWorkLog(this.valId)
+      // this.queryDeviceWorkLog(this.valId)
     }
   },
   components: {

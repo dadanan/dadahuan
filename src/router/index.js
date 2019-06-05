@@ -63,23 +63,23 @@ export const constantRouterMap = [
       }
     ]
   },
-  {
-    path: '/engineering',
-    component: Layout,
-    redirect: 'noredirect',
-    children: [
-      {
-        path: 'means',
-        component: () => import('@/views/engineering/means'),
-        name: 'means',
-        meta: {
-          title: 'means',
-          icon: 'tachometer-alt', 
-          noCache: true 
-        }
-      }
-    ]
-  },
+  // {
+  //   path: '/engineering',
+  //   component: Layout,
+  //   redirect: 'noredirect',
+  //   children: [
+  //     {
+  //       path: 'means',
+  //       component: () => import('@/views/engineering/means'),
+  //       name: 'means',
+  //       meta: {
+  //         title: 'means',
+  //         icon: 'tachometer-alt', 
+  //         noCache: true 
+  //       }
+  //     }
+  //   ]
+  // },
 ]
 
 export default new Router({
@@ -157,67 +157,7 @@ export const asyncRouterMap = [
     name: 'big-picture-mode-project',
     hidden: true
   },
-  {
-    path: '/analytics',
-    component: Layout,
-    name: 'analytics',
-    redirect: 'noredirect',
-    alwaysShow: true,
-    meta: {
-      title: 'analytics',
-      icon: 'chart-bar'
-    },
-    children: [
-      {
-        path: 'order',
-        component: () => import('@/views/analytics/order'),
-        name: 'orderAnalytics',
-        meta: {
-          title: 'orderAnalytics'
-        }
-      },
-      {
-        path: 'user',
-        component: () => import('@/views/analytics/user'),
-        name: 'userAnalytics',
-        meta: {
-          title: 'userAnalytics'
-        }
-      },
-      {
-        path: 'device',
-        component: () => import('@/views/analytics/device'),
-        name: 'deviceAnalytics',
-        meta: {
-          title: 'deviceAnalytics'
-        }
-      },
-      {
-        path: 'system',
-        component: () => import('@/views/blank'),
-        name: 'systemAnalytics',
-        meta: {
-          title: 'systemAnalytics'
-        }
-      }
-      // {
-      //   path: 'bigDataPanel',
-      //   component: () => import('@/views/analytics/bigDataPanel'),
-      //   name: 'bigDataPanel',
-      //   meta: {
-      //     title: 'bigDataPanel'
-      //   }
-      // },
-      // {
-      //   path: 'newBigDataPanel',
-      //   component: () => import('@/views/analytics/bigDataPanel/new'),
-      //   name: 'newBigDataPanel',
-      //   meta: {
-      //     title: 'newBigDataPanel'
-      //   }
-      // }
-    ]
-  },
+
   // device: '设备管理',
   // deviceList: '设备列表',
   // deviceGroup: '设备组管理',
@@ -225,6 +165,7 @@ export const asyncRouterMap = [
   // deviceConfig: '设备配置管理',
   // deviceModel: '设备备案管理',
   // deviceFunction: '设备功能管理',
+
   {
     path: '/device',
     component: Layout,
@@ -245,47 +186,38 @@ export const asyncRouterMap = [
         }
       },
       {
-        path: 'group',
-        component: () => import('@/views/device/group'),
-        name: 'deviceGroup',
-        meta: {
-          title: 'deviceGroup'
-        }
-      },
-      {
-        path: 'cluster',
-        component: () => import('@/views/device/cluster'),
-        name: 'deviceCluster',
-        meta: {
-          title: 'deviceCluster'
-        }
-      },
-      {
         path: 'config',
         component: () => import('@/views/device/config'),
         name: 'deviceConfig',
         meta: {
           title: 'deviceConfig'
         }
-      },
+      }
+    ]
+  },
+  //用户管理
+  {
+    path: '/analytics',
+    component: Layout,
+    name: 'analytics',
+    redirect: 'noredirect',
+    alwaysShow: true,
+    meta: {
+      title: 'analytics',
+      icon: 'chart-bar'
+    },
+    children: [
       {
-        path: 'model',
-        component: () => import('@/views/device/model'),
-        name: 'deviceModel',
+        path: 'order',
+        component: () => import('@/views/analytics/order'),
+        name: 'orderAnalytics',
         meta: {
-          title: 'deviceModel'
-        }
-      },
-      {
-        path: 'function',
-        component: () => import('@/views/device/function'),
-        name: 'deviceFunction',
-        meta: {
-          title: 'deviceFunction'
+          title: 'orderAnalytics'
         }
       }
     ]
   },
+  
   {
     path: '/alarm',
     component: Layout,
@@ -320,79 +252,66 @@ export const asyncRouterMap = [
         meta: {
           title: 'alarmConfig'
         }
-      }
+      },
+      {
+        path: 'operator',
+        component: () => import('@/views/alarm/operator'),
+        name: 'alarmOperator',
+        meta: {
+          title: 'alarmOperator'
+        }
+      },
+      {
+        path: 'referees',
+        component: () => import('@/views/alarm/referees'),
+        name: 'alarmReferees',
+        meta: {
+          title: 'alarmReferees'
+        }
+      },
     ]
   },
   {
-    path: '/order',
+    path: '/apply',
     component: Layout,
-    name: 'order',
+    name: 'apply',
     redirect: 'noredirect',
     alwaysShow: true,
     meta: {
-      title: 'order',
-      icon: 'file-invoice'
+      title: 'apply',
+      icon: 'hdd'
     },
     children: [
       {
-        path: 'rent',
-        component: () => import('@/views/order/rent'),
-        name: 'rentOrder',
+        path: 'people',
+        component: () => import('@/views/apply/people'),
+        name: 'applyPeople',
         meta: {
-          title: 'rentOrder'
+          title: 'applyPeople'
         }
       },
       {
-        path: 'payment',
-        component: () => import('@/views/order/payment'),
-        name: 'paymentOrder',
+        path: 'dev',
+        component: () => import('@/views/apply/dev'),
+        name: 'applyDev',
         meta: {
-          title: 'paymentOrder'
+          title: 'applyDev'
         }
       },
       {
-        path: 'sales',
-        component: () => import('@/views/blank'),
-        name: 'salesOrder',
+        path: 'site',
+        component: () => import('@/views/apply/site'),
+        name: 'applySite',
         meta: {
-          title: 'salesOrder'
+          title: 'applySite'
         }
       },
       {
-        path: 'after-sale',
-        component: () => import('@/views/blank'),
-        name: 'afterSaleOrder',
+        path: 'fran',
+        component: () => import('@/views/apply/fran'),
+        name: 'applyFran',
         meta: {
-          title: 'afterSaleOrder'
-        }
-      }
-    ]
-  },
-  {
-    path: '/income',
-    component: Layout,
-    name: 'income',
-    redirect: 'noredirect',
-    alwaysShow: true,
-    meta: {
-      title: 'income',
-      icon: 'bezier-curve'
-    },
-    children: [
-      {
-        path: 'rule',
-        component: () => import('@/views/blank'),
-        name: 'incomeRule',
-        meta: {
-          title: 'incomeRule'
-        }
-      },
-      {
-        path: 'bill',
-        component: () => import('@/views/blank'),
-        name: 'incomeBill',
-        meta: {
-          title: 'incomeBill'
+          title: 'applyFran'
         }
       }
     ]
@@ -424,22 +343,22 @@ export const asyncRouterMap = [
           title: 'rentBlacklist'
         }
       },
-      {
-        path: 'toll',
-        component: () => import('@/views/rent/toll'),
-        name: 'rentToll',
-        meta: {
-          title: 'rentToll'
-        }
-      },
-      {
-        path: 'putin',
-        component: () => import('@/views/rent/putin'),
-        name: 'rentPutin',
-        meta: {
-          title: 'rentPutin'
-        }
-      },
+      // {
+      //   path: 'toll',
+      //   component: () => import('@/views/rent/toll'),
+      //   name: 'rentToll',
+      //   meta: {
+      //     title: 'rentToll'
+      //   }
+      // },
+      // {
+      //   path: 'putin',
+      //   component: () => import('@/views/rent/putin'),
+      //   name: 'rentPutin',
+      //   meta: {
+      //     title: 'rentPutin'
+      //   }
+      // },
       // {
       //   path: 'operator',
       //   component: () => import('@/views/blank'),
@@ -458,6 +377,81 @@ export const asyncRouterMap = [
       // }
     ]
   },
+  {
+    path: '/order',
+    component: Layout,
+    name: 'order',
+    redirect: 'noredirect',
+    alwaysShow: true,
+    meta: {
+      title: 'order',
+      icon: 'file-invoice'
+    },
+    children: [
+      {
+        path: 'rent',
+        component: () => import('@/views/order/rent'),
+        name: 'rentOrder',
+        meta: {
+          title: 'rentOrder'
+        }
+      },
+      {
+        path: 'payment',
+        component: () => import('@/views/order/payment'),
+        name: 'paymentOrder',
+        meta: {
+          title: 'paymentOrder'
+        }
+      },
+      // {
+      //   path: 'sales',
+      //   component: () => import('@/views/blank'),
+      //   name: 'salesOrder',
+      //   meta: {
+      //     title: 'salesOrder'
+      //   }
+      // },
+      // {
+      //   path: 'after-sale',
+      //   component: () => import('@/views/blank'),
+      //   name: 'afterSaleOrder',
+      //   meta: {
+      //     title: 'afterSaleOrder'
+      //   }
+      // }
+    ]
+  },
+  {
+    path: '/income',
+    component: Layout,
+    name: 'income',
+    redirect: 'noredirect',
+    alwaysShow: true,
+    meta: {
+      title: 'income',
+      icon: 'bezier-curve'
+    },
+    children: [
+      {
+        path: 'bill',
+        component: () => import('@/views/income/index'),
+        name: 'incomeBill',
+        meta: {
+          title: 'incomeBill'
+        }
+      },
+      {
+        path: 'rule',
+        component: () => import('@/views/income/rule'),
+        name: 'incomeRule',
+        meta: {
+          title: 'incomeRule'
+        }
+      }
+    ]
+  },
+
   // {
   //   path: '/engineering',
   //   component: Layout,
@@ -506,14 +500,14 @@ export const asyncRouterMap = [
       icon: 'wrench'
     },
     children: [
-      {
-        path: 'client',
-        component: () => import('@/views/system/client'),
-        name: 'systemClient',
-        meta: {
-          title: 'systemClient'
-        }
-      },
+      // {
+      //   path: 'client',
+      //   component: () => import('@/views/system/client'),
+      //   name: 'systemClient',
+      //   meta: {
+      //     title: 'systemClient'
+      //   }
+      // },
       {
         path: 'role',
         component: () => import('@/views/system/role'),
@@ -538,14 +532,14 @@ export const asyncRouterMap = [
           title: 'systemSetting'
         }
       },
-      {
-        path: 'software',
-        component: () => import('@/views/system/software'),
-        name: 'systemSoftware',
-        meta: {
-          title: 'systemSoftware'
-        }
-      }
+      // {
+      //   path: 'software',
+      //   component: () => import('@/views/system/software'),
+      //   name: 'systemSoftware',
+      //   meta: {
+      //     title: 'systemSoftware'
+      //   }
+      // }
     ]
   },
   {
@@ -569,28 +563,28 @@ export const asyncRouterMap = [
       },
       {
         path: 'user',
-        component: () => import('@/views/message/user'),
+        component: () => import('@/views/message/message'),
         name: 'userMessage',
         meta: {
           title: 'userMessage'
         }
       },
-      {
-        path: 'alarm',
-        component: () => import('@/views/message/message'),
-        name: 'alarmMessage',
-        meta: {
-          title: 'alarmMessage'
-        }
-      },
-      {
-        path: 'after-sale',
-        component: () => import('@/views/message/NoticeMessage'),
-        name: 'afterSaleMessage',
-        meta: {
-          title: 'afterSaleMessage'
-        }
-      }
+      // {
+      //   path: 'alarm',
+      //   component: () => import('@/views/blank'),
+      //   name: 'alarmMessage',
+      //   meta: {
+      //     title: 'alarmMessage'
+      //   }
+      // },
+      // {
+      //   path: 'after-sale',
+      //   component: () => import('@/views/message/NoticeMessage'),
+      //   name: 'afterSaleMessage',
+      //   meta: {
+      //     title: 'afterSaleMessage'
+      //   }
+      // }
     ]
   },
   { path: '*', redirect: '/404', hidden: true }

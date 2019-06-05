@@ -468,7 +468,7 @@ export const realData = {
       {
         id: 1,
         icon: 'hdd',
-        name: '今日设备新增数',
+        name: '设备销售数',
         value: 10,
         isVisible: true
       },
@@ -503,7 +503,7 @@ export const realData = {
     ],
     用户分析: [{
         id: 5,
-        icon: 'hdd',
+        icon: 'people-carry',
         name: '当前用户总人数',
         value: 760,
         isVisible: true
@@ -511,13 +511,13 @@ export const realData = {
       {
         id: 6,
         icon: 'hdd',
-        name: '昨日用户增长数',
+        name: '设备销售数',
         value: 23,
         isVisible: false
       },
       {
         id: 7,
-        icon: 'hdd',
+        icon: 'people-carry',
         name: '今日活跃用户数',
         value: 671,
         isVisible: true
@@ -531,7 +531,7 @@ export const realData = {
       // },
       {
         id: 9,
-        icon: 'hdd',
+        icon: 'people-carry',
         name: '当前用户活跃数',
         value: 759,
         isVisible: false
@@ -539,54 +539,53 @@ export const realData = {
     ],
     环境分析: [{
         id: 10,
-        icon: 'hdd',
-        name: 'PM 2.5 传感器总数',
+        icon: 'hand-holding-usd',
+        name: '今日营收(元)',
         value: 843,
-        isVisible: false
+        isVisible: true
       },
-      // {
-      //   id: 11,
-      //   icon: 'hdd',
-      //   name: '甲醛传感器总数',
-      //   value: 770,
-      //   isVisible: false
-      // },
-      // {
-      //   id: 12,
-      //   icon: 'hdd',
-      //   name: 'CO2 传感器总数',
-      //   value: 770,
-      //   isVisible: false
-      // },
-      // {
-      //   id: 13,
-      //   icon: 'hdd',
-      //   name: 'TVOC 传感器数据总数',
-      //   value: 0,
-      //   isVisible: false
-      // },
-      // {
-      //   id: 14,
-      //   icon: 'hdd',
-      //   name: '优良环境数',
-      //   value: 718,
-      //   isVisible: false
-      // },
+      {
+        id: 11,
+        icon: 'hand-holding-usd',
+        name: '本月营收(元)',
+        value: 770,
+        isVisible: true
+      },
+      {
+        id: 12,
+        icon: 'hand-holding-usd',
+        name: '总分润(元)',
+        value: 770,
+        isVisible: true
+      },
+      {
+        id: 13,
+        icon: 'hand-holding-usd',
+        name: '今日分润(元)',
+        value: 0,
+        isVisible: true
+      },
+      {
+        id: 14,
+        icon: 'hand-holding-usd',
+        name: '本月分润(元)',
+        value: 718,
+        isVisible: true
+      },
       {
         id: 15,
-        icon: 'hdd',
-        name: '优良环境比率',
-        value: 80,
-        unit: '',
-        isVisible: false
-      }
+        icon: 'hand-holding-usd',
+        name: '总营收(元)',
+        value: 718,
+        isVisible: true
+      },
     ],
     订单分析: [{
         id: 16,
-        icon: 'hdd',
+        icon: 'file-invoice',
         name: '今日订单数',
         value: 10,
-        isVisible: false
+        isVisible: true
       },
       // {
       //   id: 17,
@@ -622,7 +621,7 @@ export const realData = {
         icon: 'hdd',
         name: '今日新增告警记录',
         value: 0,
-        isVisible: true
+        isVisible: false
       },
       // {
       //   id: 22,
@@ -639,34 +638,77 @@ export const realData = {
         value: 28,
         isVisible: false
       },
-      // {
-      //   id: 24,
-      //   icon: 'hdd',
-      //   name: '今日分润金额',
-      //   value: 0,
-      //   isVisible: false
-      // }
     ]
   },
   图表展示: {
-    设备分析: [{
+    设备分析: [
+      {
         id: 0,
-        name: '设备增加趋势表',
+        name: '设备地图',
+        options:{
+          title : {
+            text: '设备分布',
+            x:'center'
+        },
+        tooltip : {
+            trigger: 'item'
+        },
+        legend: {
+            orient: 'vertical',
+            x:'left',
+            data:['设备地图']
+        },
+        dataRange: {
+            min: 0,
+            max: 20,
+            x: 'left',
+            y: 'bottom',
+            text:['高','低'],           
+            calculable : true
+        },
+        toolbox: {
+            show: true,
+            orient : 'vertical',
+            x: 'right',
+            y: 'center',
+            // feature : {
+            //     mark : {show: true},
+            //     dataView : {show: true, readOnly: false},
+            //     restore : {show: true},
+            //     saveAsImage : {show: true}
+            // }
+        },
+        roamController: {
+            show: true,
+            x: 'right',
+            mapTypeControl: {
+                'china': true
+            }
+        },
+        series : [
+            {
+                name: '设备地图',
+                type: 'map',
+                mapType: 'china',
+                roam: true,   //鼠标缩放属性
+                itemStyle:{
+                    normal:{label:{show:true}},
+                    emphasis:{label:{show:true}}
+                },
+                data:[]
+            }
+        ]
+        },
+        isVisible: true
+      },
+      {
+        id: 1,
+        name: '营收曲线',
         options: {
           title: {
-            text: '设备增加趋势表'
+            text: '营收曲线'
           },
-          tooltip: {
-            trigger: 'item',
-            formatter: function (params) {
-            var htmlStr ='<div>';
-            htmlStr += params.name + '<br/>';//x轴的名称
-            htmlStr += '<span style="margin-right:5px;display:inline-block;width:10px;height:10px;border-radius:5px;"></span>';
-            htmlStr += params.name + '：'+params.data + '台';
-            htmlStr += '</div>';
-            return htmlStr; 
-        }
-          },
+          tooltip: {},
           legend: {},
           xAxis: {
             data: [
@@ -686,13 +728,13 @@ export const realData = {
           },
           yAxis: {},
           series: [{
-              name: '设备总数',
+              name: '营收曲线',
               type: 'bar',
-              data: [5, 20, 36, 10, 10, 20, 5, 20, 36, 10, 10, 20]
+              data: [80, 70, 90, 70, 50, 90, 70, 70, 90, 80]
             },
             {
-              name: '增长趋势',
-              data: [5, 21, 10, 34, 5, 20, 11, 22, 50, 34, 5, 20],
+              name: '营收曲线',
+              data: [80, 70, 90, 70, 50, 90, 70, 70, 90, 80],
               type: 'line',
               smooth: true
             }
@@ -701,139 +743,49 @@ export const realData = {
         isVisible: true
       },
       {
-        id: 1,
-        name: '设备地区分布图',
+        id: 2,
+        name: '销售曲线',
         options: {
           title: {
-            text: '设备地区分布图'
+            text: '销售曲线'
           },
           tooltip: {},
-          xAxis: {
-            type: 'value'
-          },
-          yAxis: {
-            type: 'category',
-            data: ['其他', '上海', '江苏', '北京', '浙江', '广东', '湖南']
-          },
-          series: [{
-            name: '设备数量',
-            type: 'bar',
-            data: [70, 137, 218, 102, 90, 90, 170]
-          }]
-        },
-        isVisible: true
-      },
-      {
-        id: 2,
-        name: '在线设备占比图',
-        options: {
-          title: {
-            text: '在线设备占比图'
-          },
-          tooltip: {
-            formatter: '{b}: {c} ({d}%)'
-          },
           legend: {},
-          series: [{
-            type: 'pie',
-            radius: ['50%', '70%'],
-            data: [{
-                value: 671,
-                name: '在线设备'
-              },
-              {
-                value: 181,
-                name: '离线设备'
-              }
+          xAxis: {
+            data: [
+              '00:00',
+              '01:00',
+              '02:00',
+              '03:00',
+              '04:00',
+              '05:00',
+              '06:00',
+              '07:00',
+              '08:00',
+              '09:00',
+              '10:00',
+              '11:00',
+              '12:00'
             ]
+          },
+          yAxis: {},
+          series: [{
+            name: '设备销售数',
+            type: 'bar',
+            data: []
+          },
+          {
+            name: '设备销售数',
+            data: [],
+            type: 'line',
+            smooth: true
           }]
         },
         isVisible: true
       },
+      
       {
         id: 3,
-        name: '设备型号占比图',
-        options: {
-          title: {
-            text: '设备型号占比图'
-          },
-          tooltip: {
-            formatter: '{b}: {c} ({d}%)'
-          },
-          legend: {},
-          series: [{
-            type: 'pie',
-            radius: ['50%', '70%'],
-            data: [{
-                value: 10.23,
-                name: 'A型控制器'
-              },
-              {
-                value: 2.73,
-                name: '慧洋环保科技'
-              },
-              {
-                value: 16.15,
-                name: '智慧新风'
-              },
-              {
-                value: 22.26,
-                name: '检测探头'
-              },
-              {
-                value: 1.94,
-                name: '德杯电子净化'
-              }
-            ]
-          }]
-        },
-        isVisible: true
-      },
-      // {
-      //   id: 4,
-      //   name: '公众号设备数量分布',
-      //   options: {
-      //     title: {
-      //       text: '公众号设备数量分布'
-      //     },
-      //     tooltip: {},
-      //     legend: {},
-      //     xAxis: {
-      //       data: ['英德罗曼', '惠阳', '智慧新风', '宝智', '环可']
-      //     },
-      //     yAxis: {},
-      //     series: [{
-      //       name: '设备总数',
-      //       type: 'bar',
-      //       data: [442, 104, 138, 142, 26]
-      //     }]
-      //   },
-      //   isVisible: false
-      // },
-      // {
-      //   id: 5,
-      //   name: '设备增速排名',
-      //   options: {
-      //     title: {
-      //       text: '设备增速排名'
-      //     },
-      //     tooltip: {},
-      //     legend: {},
-      //     xAxis: {
-      //       data: ['英德罗曼', '惠阳', '智慧新风', '宝智', '环可']
-      //     },
-      //     yAxis: {},
-      //     series: [{
-      //       name: '增长趋势',
-      //       data: [2, 54, 32, 18, 20],
-      //       type: 'line'
-      //     }]
-      //   },
-      //   isVisible: false
-      // }
-    ],
-    用户分析: [{
-        id: 6,
         name: '用户增加趋势表',
         options: {
           title: {
@@ -857,14 +809,16 @@ export const realData = {
               '十二月'
             ]
           },
-          yAxis: {},
+          yAxis: {
+            data:[]
+          },
           series: [{
               name: '用户总数',
               type: 'bar',
               data: [80, 70, 90, 70, 50, 90, 70, 70, 90, 80]
             },
             {
-              name: '增长趋势',
+              name: '用户总数',
               data: [80, 70, 90, 70, 50, 90, 70, 70, 90, 80],
               type: 'line',
               smooth: true
@@ -872,6 +826,48 @@ export const realData = {
           ]
         },
         isVisible: true
+      }
+    ],
+    用户分析: [{
+        id: 6,
+        name: '用户增加曲线',
+        options: {
+          title: {
+            text: '用户增加曲线'
+          },
+          tooltip: {},
+          legend: {},
+          xAxis: {
+            data: [
+              '一月',
+              '二月',
+              '三月',
+              '四月',
+              '五月',
+              '六月',
+              '七月',
+              '八月',
+              '九月',
+              '十月',
+              '十一月',
+              '十二月'
+            ]
+          },
+          yAxis: {},
+          series: [{
+              name: '用户增加曲线',
+              type: 'bar',
+              data: [80, 70, 90, 70, 50, 90, 70, 70, 90, 80]
+            },
+            {
+              name: '用户增加曲线',
+              data: [80, 70, 90, 70, 50, 90, 70, 70, 90, 80],
+              type: 'line',
+              smooth: true
+            }
+          ]
+        },
+        isVisible: false
       },
       {
         id: 7,
@@ -907,7 +903,7 @@ export const realData = {
             smooth: true
           }]
         },
-        isVisible: true
+        isVisible: false
       }
     ]
   }

@@ -8,113 +8,148 @@
       </div>
       <el-table :data="userList" style="width: 100%" class="mb20" border>
         <el-table-column type="index"></el-table-column>
-        <el-table-column prop="userName" label="账号" show-overflow-tooltip sortable>
+        <el-table-column prop="registerNo" label="账号" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="nickName" label="昵称" show-overflow-tooltip sortable>
+        <el-table-column prop="name" label="昵称" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="telephone" label="手机号" show-overflow-tooltip sortable>
+        <el-table-column prop="mobileNo" label="手机号" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column label="所属角色" show-overflow-tooltip>
+        <el-table-column prop="franName" label="加盟商" show-overflow-tooltip sortable>
+        </el-table-column>
+        <el-table-column prop="wxHeadimgurl" label="微信头像" show-overflow-tooltip>
           <template slot-scope="scope">
-            <span>{{ getRoleName(scope.row.roleId) }}</span>
+            <template v-if="scope.row.wxHeadimgurl">
+              <img :src="scope.row.wxHeadimgurl" class="table-img">
+            </template>
+            <template v-else>
+              --
+            </template>
           </template>
         </el-table-column>
-        <el-table-column prop="customerName" label="所属客户" show-overflow-tooltip sortable>
+        <el-table-column prop="wxNickName" label="微信昵称" show-overflow-tooltip sortable>
+          <template slot-scope="scope">
+            <template v-if="scope.row.wxNickName">
+              {{scope.row.wxNickName}}
+            </template>
+            <template v-else>
+              --
+            </template>
+          </template>
         </el-table-column>
-        <!-- <el-table-column prop="createUser" label="创建者" show-overflow-tooltip sortable>
-        </el-table-column> -->
+        <el-table-column prop="acctType" label="用户类型" show-overflow-tooltip sortable>
+          <template slot-scope="scope">
+            <template v-if="scope.row.acctType == 'web'">
+              普通用户
+            </template>
+            <template v-else-if="scope.row.acctType == 'emp'">
+              内部员工
+            </template>
+            <template v-else-if="scope.row.acctType == 'par'">
+              总监
+            </template>
+            <template v-else-if="scope.row.acctType == 'fran'">
+              加盟商
+            </template>
+            <template v-else-if="scope.row.acctType == 'operator'">
+              运营商
+            </template>
+          </template>
+        </el-table-column>
         <el-table-column prop="createTime" label="创建时间" show-overflow-tooltip sortable>
           <template slot-scope="scope">
-            <span>{{ new Date(scope.row.createTime).toLocaleString() }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="状态" show-overflow-tooltip>
-          <template slot-scope="scope">
-            <span>{{ getStatusName(scope.row.status) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="lastUpdateTime" label="上次修改时间" show-overflow-tooltip sortable>
-          <template slot-scope="scope">
-            <span>{{ new Date(scope.row.lastUpdateTime).toLocaleString() }}</span>
+              <template v-if="scope.row.createTime">
+                {{ new Date(scope.row.createTime).toLocaleString() }}
+              </template>
+              <template v-else>
+                --
+              </template>
           </template>
         </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button type="text" @click="showEditRoleDialog(scope.row)">编辑</el-button>
-            <el-button type="text" @click="deleteUser(scope.row.id)">删除</el-button>
+            <!-- <el-button type="text" @click="deleteUser(scope.row.id)">删除</el-button> -->
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination :current-page="listQuery.page" :page-sizes="listQuery.pageSizes" :page-size="100" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.limit">
-      </el-pagination>
+      <!-- <el-pagination :current-page="listQuery.page" :page-sizes="listQuery.pageSizes" :page-size="100" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.limit">
+      </el-pagination> -->
     </el-card>
+    <!-- 添加用户 -->
     <el-dialog top='4vh' :close-on-click-modal=false title="添加系统用户" :visible.sync="isCreateUserDialogVisible">
       <el-form :model='creatingData' :rules='rules' ref='creatingData' label-position="left" label-width="150px">
-        <el-form-item label="账号" prop='userName'>
-          <el-input v-model='creatingData.userName'></el-input>
+        <el-form-item label="昵称" prop='name'>
+          <el-input v-model="creatingData.name"></el-input>
         </el-form-item>
-        <el-form-item label="所属角色" prop='roleId'>
-          <el-select v-model="creatingData.roleId" placeholder="请选择">
-            <el-option v-for="item in roleList" :key="item.id" :label="item.roleName" :value="item.id">
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="手机" prop='telephone'>
-          <el-input type='number' v-model="creatingData.telephone"></el-input>
-        </el-form-item>
-        <el-form-item label="绑定微信 Open ID" prop='openID'>
-          <el-input v-model="creatingData.openID"></el-input>
+        <el-form-item label="账号" prop='registerNo'>
+          <el-input v-model='creatingData.registerNo'></el-input>
         </el-form-item>
         <el-form-item label="密码" prop='password'>
           <el-input v-model="creatingData.password"></el-input>
         </el-form-item>
-        <el-form-item label="昵称" prop='nickName'>
-          <el-input v-model="creatingData.nickName"></el-input>
-        </el-form-item>
-        <el-form-item label="状态" prop='status'>
-          <el-select v-model="creatingData.status" placeholder="请选择">
-            <el-option v-for="item in status" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="isCreateUserDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="validate('creatingData','createUser')">确定</el-button>
-      </div>
-    </el-dialog>
-    <el-dialog top='4vh' :close-on-click-modal=false title="编辑系统用户" :visible.sync="isEditUserDialogVisible">
-      <el-form label-position="left" label-width="150px" :model='editingData' :rules='rules' ref='editingData'>
-        <el-form-item label="账号" prop="userName">
-          <el-input v-model='editingData.userName'></el-input>
-        </el-form-item>
-        <el-form-item label="所属角色" prop='roleId'>
-          <el-select v-model="editingData.roleId" placeholder="请选择">
+        <el-form-item label="用户类型">
+          <el-select v-model="creatingData.acctType" placeholder="请选择" style="width:300px">
             <el-option v-for="item in roleList" :key="item.id" :label="item.roleName" :value="item.id">
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="手机" prop='telephone'>
-          <el-input type='number' v-model="editingData.telephone"></el-input>
-        </el-form-item>
-        <el-form-item prop='openID' label="绑定微信 Open ID">
-          <el-input v-model="editingData.openID"></el-input>
-        </el-form-item>
-        <el-form-item prop='password' label="密码">
-          <el-input v-model="editingData.password" placeholder="请输入新密码"></el-input>
-        </el-form-item>
-        <el-form-item prop='nickName' label="昵称">
-          <el-input v-model="editingData.nickName"></el-input>
-        </el-form-item>
-        <el-form-item prop='status' label="状态">
-          <el-select v-model="editingData.status" placeholder="请选择">
-            <el-option v-for="item in status" :key="item.value" :label="item.label" :value="item.value">
+        <el-form-item label="所属角色">
+          <el-select v-model="creatingData.roleId" multiple collapse-tags  placeholder="请选择" style="width:300px">
+            <el-option v-for="item in options" :key="item.id" :label="item.roleName" :value="item.id">
             </el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="手机" prop='mobileNo'>
+          <el-input type='number' v-model="creatingData.mobileNo"></el-input>
+        </el-form-item>
+        <el-form-item label="绑定微信 Open ID" prop='openId'>
+          <el-input v-model="creatingData.openId"></el-input>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="isEditUserDialogVisible = false">取消</el-button>
+        <el-button @click="isCreateUserDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="validate('creatingData','webAddUser')">确定</el-button>
+      </div>
+    </el-dialog>
+    <!-- 编辑用户 -->
+    <el-dialog top='4vh' :close-on-click-modal=false title="编辑系统用户" :visible.sync="isEditUserDialogVisible">
+      <el-form label-position="left" label-width="150px" :model='editingData' :rules='rules' ref='editingData'>
+        <el-form-item label="昵称" prop='name'>
+          <el-input v-model="editingData.name"></el-input>
+        </el-form-item>
+        <el-form-item label="账号" prop="registerNo">
+          <el-input v-model='editingData.registerNo' disabled></el-input>
+        </el-form-item>
+        <el-form-item label="用户类型"  v-if=" editingData.acctType != 'operator' && editingData.acctType != 'fran'">
+          <el-select v-model="editingData.acctType" placeholder="请选择" style="width:300px">
+            <el-option v-for="item in roleList" :key="item.id" :label="item.roleName" :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="用户类型" v-else>
+          <el-select v-model="editingData.acctType" placeholder="请选择" disabled style="width:300px">
+            <el-option v-for="item in roleList1" :key="item.id" :label="item.roleName" :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="所属角色">
+          <el-select v-model="editingData.roleIds" multiple collapse-tags  placeholder="请选择"  style="width:300px">
+            <el-option v-for="item in options" :key="item.id" :label="item.roleName" :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="手机" prop='mobileNo'>
+          <el-input type='number' v-model="editingData.mobileNo"></el-input>
+        </el-form-item>
+        <el-form-item label="绑定微信 Open ID" prop='openId'>
+          <el-input v-model="editingData.openId" disabled></el-input>
+        </el-form-item>
+        <!-- <el-form-item label="密码" prop='password'>
+          <el-input v-model="editingData.password"></el-input>
+        </el-form-item> -->
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancel">取消</el-button>
         <el-button type="primary" @click="validate('editingData','editUser')">确定</el-button>
       </div>
     </el-dialog>
@@ -123,26 +158,54 @@
 
 <script>
 import { createUser, getUserList, updateUser, delUser ,getUserById} from '@/api/user'
-import { getRoleList } from '@/api/role'
+import { 
+  getRegisterUserList,
+  webAddUser,
+  getRoleList,
+  editUserInfo,
+  getRegisterUserInfo,
+  deleteRole
+} from '@/api/zulin'
 
 export default {
   data() {
     return {
       listQuery: {
-        limit: 100,
-        page: 1,
-        pageSizes: [50, 100, 200, 300]
+        length: 100,
+        page: 1
       },
       userList: [],
       isCreateUserDialogVisible: false,
       isEditUserDialogVisible: false,
       creatingData: {},
-      editingData: {},
+      editingData: {
+        roleIds:[],
+        acctType:''
+      },
+      options:[],
       roleList: [
         {
-          id: '1',
-          roleName: '管理员'
+          id: 'web',
+          roleName: '普通账号'
+        },
+        {
+          id: 'emp',
+          roleName: '员工账号'
+        },
+        {
+          id: 'par',
+          roleName: '总监'
         }
+      ],
+      roleList1:[
+        {
+          id: 'operator',
+          roleName: '运营商'
+        },{
+          id: 'fran',
+          roleName: '加盟商'
+        }
+
       ],
       status: [
         {
@@ -159,12 +222,11 @@ export default {
         }
       ],
       rules: {
-        userName: [
+        registerNo: [
           { max: 15, message: '最大长度为15个字符', trigger: 'blur' },
           { required: true, message: '请输入用户名', trigger: 'blur' }
         ],
-        roleId: [{ required: true, message: '请选择角色', trigger: 'change' }],
-        telephone: [
+        mobileNo: [
           { min: 11, max: 11, message: '长度为11个数字', trigger: 'blur' },
           {
             required: true,
@@ -172,7 +234,7 @@ export default {
             trigger: 'blur'
           }
         ],
-        openID: [
+        openId: [
           { min: 1, max: 50, message: '最长为50个字符', trigger: 'blur' }
         ],
         password: [
@@ -183,25 +245,23 @@ export default {
             trigger: 'blur'
           }
         ],
-        nickName: [
+        name: [
           { max: 20, message: '最长为20个字符', trigger: 'blur' },
           {
             required: true,
             message: '请输入昵称',
             trigger: 'blur'
           }
-        ],
-        status: [
-          {
-            required: true,
-            message: '请选择状态',
-            trigger: 'change'
-          }
         ]
       }
     }
   },
   methods: {
+    cancel(){
+      this.isEditUserDialogVisible = false
+      this.editingData.roleIds=[],
+      this.editingData.acctType=''
+    },
     validate(form, cb) {
       /**
        * 函数式表单验证
@@ -220,33 +280,29 @@ export default {
         }
       })
     },
-    getRoleName(id) {
-      const role = this.roleList.filter(item => item.id === id)[0]
-      if (role && role.roleName) {
-        return role.roleName
-      }
-    },
     getStatusName(value) {
       const status = this.status.filter(item => item.value === value)[0]
       if (status && status.label) {
         return status.label
       }
     },
-    showEditRoleDialog(data) {
+    showEditRoleDialog(data1) {
+      // this.editingData.roleIds = []
       this.isEditUserDialogVisible = true
-       getUserById(data.id).then(res => {
-         this.editingData = res.data
-       })
-      
+      getRegisterUserInfo({registerNo:data1.registerNo}).then(res=>{
+        this.editingData = res.data
+      })
     },
+    // 修改
     editUser() {
-      updateUser(this.editingData).then(res => {
+      editUserInfo(this.editingData).then(res => {
         if (res.code === 200) {
           this.$message({
             type: 'success',
             message: '更新成功!'
           })
           this.isEditUserDialogVisible = false
+          this.getRegisterUserList()
         } else {
           this.$message({
             type: 'error',
@@ -255,24 +311,16 @@ export default {
         }
       })
     },
-    createUser() {
+    webAddUser() {
       const time = new Date().toISOString()
-      const user = {
-        ...this.creatingData,
-        createTime: time,
-        lastUpdateTime: time
-      }
-      createUser(user).then(res => {
+      webAddUser(this.creatingData).then(res => {
         if (res.code === 200) {
           this.$message({
             type: 'success',
             message: '添加成功!'
           })
           this.isCreateUserDialogVisible = false
-          this.userList.push({
-            ...user,
-            id: res.data
-          })
+          this.getRegisterUserList()
         } else {
           this.$message({
             type: 'error',
@@ -288,7 +336,7 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          delUser(id)
+          deleteRole(id)
             .then(res => {
               if (res.code === 200) {
                 this.$message({
@@ -335,17 +383,26 @@ export default {
       this.listQuery.page = val
       this.getUserList()
     },
-    getRoleList() {
-      getRoleList().then(res => {
-        if (res.code === 200) {
-          this.roleList = res.data
-        }
+    getRegisterUserList() {
+      getRegisterUserList(this.listQuery).then(res => {
+          this.userList = res.data
+      })
+    },
+    getRoleList(){
+      getRoleList().then(res=>{
+        this.options = res.data
       })
     }
   },
   created() {
-    this.getUserList()
+    // this.getUserList()
     this.getRoleList()
+    this.getRegisterUserList()
   }
 }
 </script>
+<style>
+.table-img{
+  width: 50%;
+}
+</style>

@@ -5,7 +5,7 @@
         <div class="login-header">
           <div class="login-header__logo">
             <img v-if='logo' :src="logo" alt="logo">
-            <img v-else src="/static/images/logo.svg" alt="logo">
+            <img v-else src="/static/images/logo.png" alt="logo">
           </div>
           <div v-if='siteName' class="login-header__title">{{siteName}}</div>
           <div v-else class="login-header__title">后台管理</div>
@@ -29,7 +29,9 @@
           <el-button type="text" @click="showDialog = true">忘记密码?</el-button>
         </div>
         <div class="login-form-item">
-          <el-button type="primary" style="width:100%;" :loading="loading" @click.native.prevent="handleLogin">{{$t('login.logIn')}}</el-button>
+          <el-button type="primary" style="width:45%;float:left" :loading="loading" @click.native.prevent="handleLogin">{{$t('login.logIn')}}</el-button>
+          <el-button type="primary" style="width:45%; float:right" :loading="loading" @click="sweep()">{{$t('login.WX')}}</el-button>
+          <div class="clear"></div>
         </div>
         <!--<el-button class="thirdparty-button" type="primary" @click="showDialog=true">{{$t('login.thirdparty')}}</el-button>-->
       </el-form>
@@ -47,6 +49,12 @@
       </pre>
     </el-dialog>
 
+    <el-dialog top='4vh' width=350px :close-on-click-modal=false title="微信扫码一键登录" :visible.sync="showDialog1" append-to-body>
+      <pre>
+        <vue-qrcode :value="shareURL" :options="{ width: 200 }"></vue-qrcode>
+      </pre>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -55,7 +63,10 @@ import { isvalidUsername } from '@/utils/validate'
 import LangSelect from '@/components/LangSelect'
 import SocialSign from './socialsignin'
 import { selectBackendConfigBySLD } from '@/api/customer'
+import { getWxLoginKey , wxKeyLogin } from '@/api/zulin'
+import { getToken, setToken, removeToken } from '@/utils/auth'
 
+import VueQrcode from '@chenfengyuan/vue-qrcode'
 export default {
   components: { LangSelect, SocialSign },
   // name: 'login',
@@ -79,6 +90,12 @@ export default {
         username: '',
         password: ''
       },
+      loginForm1:{
+        username: '1',
+        password: '1'
+      },
+      shareURL: '...',
+      showDialog1:false,
       loginRules: {
         username: [
           { required: true, trigger: 'blur', validator: validateUsername }
@@ -89,7 +106,9 @@ export default {
       },
       passwordType: 'password',
       loading: false,
-      showDialog: false
+      showDialog: false,
+      setInter:undefined,
+      loginKeys:''
     }
   },
   computed: {
@@ -99,6 +118,9 @@ export default {
     siteName() {
       return this.$store.getters.siteName
     }
+  },
+  destroyed() {
+    clearInterval(this.setInter);
   },
   methods: {
     showPwd() {
@@ -126,6 +148,27 @@ export default {
         }
       })
     },
+    // 微信登录
+    sweep(){
+      clearInterval(this.setInter);
+      getWxLoginKey().then(res=>{
+        this.loginKeys = res.data
+        this.shareURL = `http://${window.location.host}/h5/init?deveceNo=${res.data}&validation=1`
+        this.showDialog1 = true
+        this.setInter = setInterval(() => {
+            this.logins();
+        }, 4000);
+      })
+    },
+    logins(){
+      this.$store
+        .dispatch('LoginByUsernames', this.loginKeys)
+        .then(() => {
+          this.$router.push({ path: '/' })
+        })
+        .catch(() => {
+        })
+    },
     selectBackendConfigBySLD() {
       selectBackendConfigBySLD()
         .then(res => {
@@ -142,8 +185,12 @@ export default {
         .catch(() => {})
     }
   },
+  components: {
+    VueQrcode
+  },
   created() {
-    this.selectBackendConfigBySLD()
+    // this.selectBackendConfigBySLD()
+    // this.shareURL ="http://47.92.206.155:8070/swagger-ui.html#/"
   }
 }
 </script>
@@ -274,5 +321,8 @@ $light_gray: #eee;
     right: 35px;
     bottom: 28px;
   }
+}
+.clear{
+  clear: both;
 }
 </style>

@@ -1,17 +1,17 @@
 <template>
-  <el-dialog top='4vh' :close-on-click-modal=false title="创建实施阶段" :visible="visible" :before-close="handleCancel" @update:visible="$emit('update:visible', $event)">
+  <el-dialog top='4vh' :close-on-click-modal=false title="编辑产品定价" :visible="visible" :before-close="handleCancel" @update:visible="$emit('update:visible', $event)">
       <el-form label-width="130px" class="mb-22" :model="form">
-        <el-form-item label="规则分类名称">
-          <el-input v-model="form.label" placeholder="规则分类名称"></el-input>
+        <el-form-item label="产品名称">
+          <el-input v-model="form.name" placeholder="产品名称" disabled></el-input>
         </el-form-item>
-       <el-form-item label="排序">
-        <el-input v-model="form.sort" placeholder="规则分类排序"></el-input>
+       <el-form-item label="产品型号">
+        <el-input v-model="form.modelNo" placeholder="产品型号" disabled></el-input>
       </el-form-item>
-      <el-form-item label="标号">
-        <el-input v-model="form.value" placeholder="标号不可重复"></el-input>
+      <el-form-item label="价格">
+        <el-input v-model="form.price" placeholder="价格"></el-input>
       </el-form-item>
-        <el-form-item label="规则分类描述">
-          <el-input type="textarea" :rows='3' placeholder="规则分类描述..." v-model='form.description'></el-input>
+        <el-form-item label="产品定价描述">
+          <el-input type="textarea" :rows='3' placeholder="产品定价描述..." v-model='form.description' disabled></el-input>
         </el-form-item>
       </el-form>
     <div slot="footer" class="dialog-footer">
@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { editDict } from '@/api/rent'
+import { setPrice } from '@/api/zulin'
 
 export default {
   props: {
@@ -41,11 +41,14 @@ export default {
   },
   methods: {
     editDict() {
-      editDict(this.form).then(res => {
+      const s ={}
+      s.id = this.form.id
+      s.price = this.form.price
+      setPrice(s).then(res => {
         if (res.code === 200) {
           this.$message({
             type: 'success',
-            message: '更新成功!'
+            message: '型号定价成功!'
           })
           this.$emit('update:visible', false)
           this.$emit('update-data', this.form)

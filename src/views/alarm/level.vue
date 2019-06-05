@@ -3,124 +3,95 @@
     <el-card>
       <div class="table-opts">
         <el-form :inline="true" class="el-form--flex">
-          <el-form-item>
+          <!-- <el-form-item>
             <el-input placeholder="输入名称" v-model="query.name"></el-input>
+          </el-form-item> -->
+          <el-form-item>
+           <el-input placeholder="请输入搜索的区域" v-model="query.address"></el-input>
           </el-form-item>
           <!-- <el-form-item>
-            <el-select placeholder="选择关联" v-model="query.linkType">
-              <el-option label="不关联" value="1"></el-option>
-              <el-option label="关联设备" value="2"></el-option>
-              <el-option label="关联工程" value="3"></el-option>
+            <el-select placeholder="业务分类" v-model="query.warnLevel">
+              <el-option label="内部" value="1"></el-option>
+              <el-option label="外部" value="2"></el-option>
             </el-select>
           </el-form-item> -->
           <el-form-item>
-            <el-select placeholder="告警级别" v-model="query.warnLevel">
-              <el-option label="一级告警" value="1"></el-option>
-              <el-option label="二级告警" value="2"></el-option>
-              <el-option label="三级告警" value="3"></el-option>
-            </el-select>
+            <el-input placeholder="请输入搜索的名称" v-model="query.name"></el-input>
           </el-form-item>
           <el-form-item>
-            <el-select placeholder="状态" v-model="query.flowStatus">
-              <el-option label="待处理" value="1"></el-option>
-              <el-option label="处理中" value="2"></el-option>
-              <el-option label="审核中" value="3"></el-option>
-              <el-option label="已完成" value="4"></el-option>
-              <el-option label="已忽略" value="5"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" icon="el-icon-search" @click="selectList2">搜索</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="search">搜索</el-button>
             <el-button @click="reset">重置</el-button>
           </el-form-item>
         </el-form>
       </div>
-      <!-- CreateLevel -->
-      <create-level :visible.sync="CreateLevel" :data='editingDataCre' @add-data='addData'></create-level>
-      <ignore-level :visible.sync="IgnoreLevel" :data='editingData' @add-data='addData'></ignore-level>
-      <deal-level :visible.sync="DealLevel" :data='editingData'></deal-level>
-      <sub-deal-level :visible.sync="SubDealLevel" :data='editingDatas' @add-data='addData'></sub-deal-level>
-      <audit-deal-level :visible.sync="AuditDealLevel" :data='editingDataD' @add-data='addData'></audit-deal-level>
+      <div class="table-opts">
+        <el-button-group>
+          <el-button type="primary" @click="AddLevel= true">添加</el-button>
+          <!-- <el-button type="primary" @click="AddProcess = true">审核</el-button> -->
+          <!-- <el-button type="primary" @click="reverseDeve">启用</el-button>
+          <el-button type="primary" @click="forbitRule">禁用</el-button> -->
+          <el-button type="primary" @click="deleteRule">删除</el-button>
+          <!-- <el-button type="primary" @click="isColumnDialogVisible = true">自定义</el-button> -->
+        </el-button-group>
+      </div>
+      <add-level :visible.sync="AddLevel" @add-data='addData'></add-level>
+      <editor-level :visible.sync="EditorLevel" :data='editingData' @update-data='updateData' @add-data='addData'></editor-level>
+      <details-dev :visible.sync="DetailsDev" :data='editingData' @update-data='updateData'></details-dev>
 
       <el-table :data="levelList" style="width: 100%" class="mb20" border @selection-change="handleSelectionChange">
         <el-table-column type="selection"></el-table-column>
         <el-table-column type="index"></el-table-column>
-        <el-table-column prop="name" label="任务名称" show-overflow-tooltip sortable>
+        <el-table-column prop="name" label="加盟商名称" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="description" label="任务描述" show-overflow-tooltip sortable>
+        <el-table-column prop="mobileNo" label="手机号" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="type" label="选择关联" show-overflow-tooltip sortable>
+        <el-table-column prop="deviceCount" label="设备数量" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="projectTypeName" label="所属系统" show-overflow-tooltip sortable>
+        <el-table-column prop="address" label="加盟区域" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="ruleName" label="维保项目名称" show-overflow-tooltip sortable>
-          <!-- <template slot-scope="scope">
-            <template v-if='scope.row.isRule == 1'>
-              是
+        <el-table-column prop="referrerPercent" label="分润比例" show-overflow-tooltip sortable>
+        </el-table-column>
+        <el-table-column prop="updateUser" label="修改人" show-overflow-tooltip sortable>
+        </el-table-column>
+        <el-table-column prop="updateTime" label="更新日期" show-overflow-tooltip sortable>
+          <template slot-scope="scope">
+            <template v-if="scope.row.updateTime">
+              {{new Date(scope.row.updateTime).toLocaleString()}}
             </template>
             <template v-else>
-              否
-            </template>
-          </template> -->
-        </el-table-column>
-        <el-table-column prop="warnLevel" label="告警级别" show-overflow-tooltip sortable>
-        </el-table-column>
-        <el-table-column prop="sourceType" label="任务来源" show-overflow-tooltip sortable>
-        </el-table-column>
-        <el-table-column prop="finalTime" label="到期处理日" show-overflow-tooltip sortable>
-          <template slot-scope="scope">
-            <template>
-              {{new Date(scope.row.finalTime).toLocaleString()}}
+               --
             </template>
           </template>
-        </el-table-column>
-        <el-table-column prop="flowStatus" label="状态" show-overflow-tooltip sortable>
         </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <template v-if="scope.row.flowStatus == '待处理'">
-              <el-button type="text" @click="ignoreLevel(scope.row)">忽略</el-button>
-              <el-button type="text" @click="dealLevel(scope.row)">标记处理中</el-button>
-              <el-button type="text" @click="createLevel(scope.row)">详情</el-button>
-            </template>
-            <template v-else-if="scope.row.flowStatus == '处理中'">
-              <el-button type="text" @click="subDealLevel(scope.row)">提交审核</el-button>
-              <el-button type="text" @click="createLevel(scope.row)">详情</el-button>
-            </template>
-            <template v-else-if="scope.row.flowStatus == '待审核'">
-              <el-button type="text" @click="auditDealLevel(scope.row)">审核</el-button>
-              <el-button type="text" @click="createLevel(scope.row)">详情</el-button>
-            </template>
-            <template v-else-if="scope.row.flowStatus == '已完成'">
-              <el-button type="text" @click="createLevel(scope.row)">详情</el-button>
-            </template>
-            <template v-else>
-              <el-button type="text" @click="createLevel(scope.row)">详情</el-button>
-            </template>
+            <!-- <el-button type="text" @click="detailsDev(scope.row)">详情</el-button> -->
+            <el-button type="text" @click="editorDev(scope.row)">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination :current-page="query.currentPage" :page-sizes="[100, 200, 300, 400]" :page-size="query.limit" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange" @current-change="handleCurrentChange">
+      <el-pagination :current-page="query.page" :page-sizes="[100, 200, 300, 400]" :page-size="query.length" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange" @current-change="handleCurrentChange">
       </el-pagination>
     </el-card>
   </div>
 </template>
 
 <script>
-import CreateLevel from './components/CreateLevel'
-import IgnoreLevel from './components/IgnoreLevel'
-import DealLevel from './components/DealLevel'
-import SubDealLevel from './components/SubDealLevel'
-import AuditDealLevel from './components/AuditDealLevel'
+import AddLevel from './components/AddLevel'
+import EditorLevel from './components/EditorLevel'
+import DetailsDev from './components/DetailsLevel'
 
-import { selectList2,subselect, deletePlan, forbitPlan } from '@/api/alarm'
+import {
+  franList,        //查询加盟商配置信息列表
+  franDelete,     //删除加盟商配置信息
+
+ } from '@/api/zulin'
+
 export default {
   components: {
-    CreateLevel,
-    IgnoreLevel,
-    DealLevel,
-    SubDealLevel,
-    AuditDealLevel
+    AddLevel,
+    EditorLevel,
+    DetailsDev,
   },
   data() {
     return {
@@ -128,111 +99,123 @@ export default {
       value1: '',
       value2: '',
       value3: '',
+      AddLevel: false,
+      EditorLevel:false,
+      DetailsDev:false,
       query: {
-        limit: 100,
-        currentPage: 1
+        length: 100,
+        page: 1
+      },
+      query1: {
+        length: 10000,
+        page: 1
       },
       total: 0,
-      selectedDeviceList: [],
-      ids: [],
-      CreateLevel: false,
-      IgnoreLevel: false,
-      DealLevel: false,
-      SubDealLevel: false,
-      AuditDealLevel: false,
       editingData: {},
-      editingDatas:{},
-      editingDataD:{},
-      editingDataCre:{}
-    }
-  },
-  methods: {
-    addData(data) {
-      this.selectList2()
-    },
-    reset(){
-      this.query.name = ''
-      this.query.status = ''
-      this.query.warnLevel = ''
-      this.query.linkType =''
-      this.selectList2()
-    },
-    selectList2() {
-      selectList2(this.query).then(res => {
-        // console.log(res)
-        const list = res.data.jobRspPoList
-        const mapList = {
-          '1': '一级告警',
-          '2': '二级告警',
-          '3': '三级告警'
-        }
-        const linkList = {
-          '0': '不关联',
-          '1': '关联设备',
-          '2': '关联工程'
-        }
-        const sourceType = {
-          '1': '计划维保',
-          '2': 'H5端反馈',
-          '3': '设备告警'
-        }
-        const flowStatus = {
-          '1': '待处理',
-          '2': '处理中',
-          '3': '待审核',
-          '4': '已完成',
-          '5': '已忽略'
-        }
-        for (var i = 0; i < list.length; i++) {
-          list[i].warnLevel = mapList[list[i].warnLevel]
-          list[i].type = linkList[list[i].type]
-          list[i].sourceType = sourceType[list[i].sourceType]
-          list[i].flowStatus = flowStatus[list[i].flowStatus]
-        }
-        this.levelList = list
-        this.total = res.data.totalCount
-      })
-    },
-    handleSizeChange(val) {
-      this.query.limit = val
-      this.selectList2()
-    },
-    handleCurrentChange(val) {
-      this.query.currentPage = val
-      this.selectList2()
-    },
-    handleSelectionChange(selection) {
-      this.selectedDeviceList = selection
-    },
-    createLevel(val) {
-      subselect(val.id).then(res=>{
-        this.editingDataCre = res.data
-        this.CreateLevel = true
-      })
-    },
-    ignoreLevel(val) {
-      this.editingData = val
-      this.IgnoreLevel = true
-    },
-    dealLevel(val) {
-      this.editingData = val
-      this.DealLevel = true
-    },
-    subDealLevel(val) {
-      subselect(val.id).then(res=>{
-        this.editingDatas = res.data
-        this.SubDealLevel = true
-      })
-    },
-    auditDealLevel(val) {
-      subselect(val.id).then(res=>{
-        this.editingDataD = res.data
-        this.AuditDealLevel = true
-      })
+      ids: [],
+      selectedDeviceList: []
     }
   },
   created() {
-    this.selectList2()
+    this.franList()
+    this.franList1()
+  },
+  methods: {
+    search(){
+      this.franList()
+    },
+    // 设备列表
+    franList(){
+      franList(this.query).then(res=>{
+        this.levelList = res.data
+      })
+    },
+    franList1(){
+      franList(this.query1).then(res=>{
+        this.total = (res.data).length
+      })
+    },
+    editorDev(val){
+      this.editingData = val
+      this.EditorLevel = true
+    },
+    detailsDev(val){
+      this.editingData =val
+      this.DetailsDev = true
+    },
+    addData(data) {
+      this.franList()
+      // this.levelList.push(data)
+    },
+    updateData(data) {
+      this.franList()
+    },
+    reset(){
+      this.query.name = ''
+      this.query.address = ''
+      // this.franList()
+    },
+    deleteRule() {
+      for (var i = 0; i < this.selectedDeviceList.length; i++) {
+        this.ids.push(this.selectedDeviceList[i].id)
+      }
+      franDelete({ idList: this.ids }).then(res => {
+        if (res.code === 200) {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+          this.selectedDeviceList = []
+          this.ids = []
+          this.franList()
+        } else {
+          this.$message({
+            type: 'error',
+            message: res.msg
+          })
+        }
+      })
+    },
+    reverseRule() {
+      for (var i = 0; i < this.selectedDeviceList.length; i++) {
+        this.ids.push(this.selectedDeviceList[i].id)
+      }
+      reverseRule({ valueList: this.ids }).then(res => {
+        if (res.code === 200) {
+          this.$message({
+            type: 'success',
+            message: '启用成功!'
+          })
+          this.selectedDeviceList = []
+          this.ids = []          
+          // this.selectList()
+        } else {
+          this.$message({
+            type: 'error',
+            message: res.msg
+          })
+        }
+      })
+    },
+    forbitRule() {
+      this.DisableDev = true
+    },
+    handleSizeChange(val) {
+      this.query.length = val
+      this.franList()
+    },
+    handleCurrentChange(val) {
+      this.query.page = val
+      this.franList()
+    },
+    editorProcess(data) {
+      this.editingData = data
+      this.EditorProcess = true
+    },
+    handleSelectionChange(selection) {
+      this.selectedDeviceList = selection
+      // console.log(selection)
+    }
   }
 }
 </script>

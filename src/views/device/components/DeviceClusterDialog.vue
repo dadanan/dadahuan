@@ -94,7 +94,7 @@ export default {
     }
   },
   created() {
-    this.select()
+    // this.select()
   },
   methods: {
     handleSelectionChange(selection) {

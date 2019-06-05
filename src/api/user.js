@@ -6,7 +6,7 @@ export function login(userName, pwd) {
     pwd
   }
   return request({
-    url: '/server/user/login',
+    url: '/temp/manage/user/webLogin',
     method: 'post',
     params: data
   })
@@ -14,8 +14,8 @@ export function login(userName, pwd) {
 
 export function updateUser(data) {
   return request({
-    url: '/server/user/updateUser',
-    method: 'put',
+    url: '/temp/manage/user/editUserInfo',
+    method: 'post',
     data
   })
 }
@@ -44,14 +44,14 @@ export function getUserList() {
 
 export function getCurrentUser() {
   return request({
-    url: '/server/user/getCurrentUser',
+    url: '/temp/manage/user/getCurrentUser',
     method: 'get'
   })
 }
 
 export function logout() {
   return request({
-    url: '/server/user/logout',
+    url: '/temp/manage/user/logout',
     method: 'delete'
   })
 }
@@ -59,5 +59,13 @@ export function getUserById(id) {
   return request({
     url: `/server/user/getUserById/${id}`,
     method: 'get'
+  })
+}
+//  修改用户名密码
+export function editMyPassword(data) {
+  return request({
+    url: `/temp/manage/user/editMyPassword`,
+    method: 'post',
+    data
   })
 }

@@ -3,9 +3,9 @@
     <el-card>
       <div class="table-opts">
         <el-form :inline="true" class="el-form--flex">
-          <el-form-item>
-            <el-select placeholder="类型">
-              <el-option label="订单号" value="1"></el-option>
+          <!-- <el-form-item>
+            <el-select placeholder="类型" v-model="sd">
+              <el-option label="订单号"></el-option>
               <el-option label="用户昵称" value="2"></el-option>
               <el-option label="设备 MAC" value="3"></el-option>
               <el-option label="投放点" value="4"></el-option>
@@ -15,7 +15,7 @@
             <el-input placeholder="关键词"></el-input>
           </el-form-item>
           <el-form-item>
-            <el-select placeholder="范围">
+            <el-select placeholder="范围" v-model="sd">
               <el-option label="今天" value="1"></el-option>
               <el-option label="七天" value="2"></el-option>
               <el-option label="30天" value="3"></el-option>
@@ -23,54 +23,94 @@
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-select placeholder="状态">
+            <el-select placeholder="状态" v-model="sd">
               <el-option label="全部" value="1"></el-option>
               <el-option label="租凭中" value="2"></el-option>
               <el-option label="已完成" value="3"></el-option>
             </el-select>
-          </el-form-item>
-          <div style="flex: 1;"></div>
+          </el-form-item> -->
+          <!-- <div style="flex: 1;"></div>
           <el-form-item>
             <el-button type="primary" icon="el-icon-search">搜索</el-button>
             <el-button>重置</el-button>
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
       </div>
       <div class="table-opts">
         <el-button-group>
-          <el-button type="primary">导出</el-button>
-          <el-button type="primary" @click="orderListColumnDialogVisible = true">自定义</el-button>
+          <!-- <el-button type="primary">导出</el-button> -->
+          <!-- <el-button type="primary" @click="orderListColumnDialogVisible = true">自定义</el-button> -->
         </el-button-group>
       </div>
       <el-table :data="orderList" style="width: 100%" class="mb20" border>
         <el-table-column type="index"></el-table-column>
-        <el-table-column prop="id" label="订单号" show-overflow-tooltip sortable v-if="orderListColumnVisible.id">
+        <el-table-column prop="modelName" label="型号名" show-overflow-tooltip sortable v-if="orderListColumnVisible.id">
         </el-table-column>
-        <el-table-column prop="nickname" label="用户昵称" show-overflow-tooltip sortable v-if="orderListColumnVisible.nickname">
+        <el-table-column prop="franNo" label="加盟商" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="pos" label="投放点" show-overflow-tooltip sortable v-if="orderListColumnVisible.pos">
+        <el-table-column prop="nickname" label="购买者" show-overflow-tooltip sortable v-if="orderListColumnVisible.nickname">
         </el-table-column>
-        <el-table-column prop="deviceMAC" label="设备MAC" show-overflow-tooltip sortable v-if="orderListColumnVisible.deviceMAC">
+        <el-table-column prop="orderAmt" label="支付金额(元)" show-overflow-tooltip sortable v-if="orderListColumnVisible.pos">
         </el-table-column>
-        <el-table-column prop="deviceName" label="设备名称" show-overflow-tooltip sortable v-if="orderListColumnVisible.deviceName">
+        <el-table-column prop="orderCount" label="订单数" show-overflow-tooltip sortable v-if="orderListColumnVisible.deviceMAC">
         </el-table-column>
-        <el-table-column prop="cost" label="支付费用" show-overflow-tooltip sortable v-if="orderListColumnVisible.cost">
+        <el-table-column prop="orderNo" label="订单号" show-overflow-tooltip sortable v-if="orderListColumnVisible.deviceName">
         </el-table-column>
-        <el-table-column prop="paymentDatetime" label="支付时间" show-overflow-tooltip sortable v-if="orderListColumnVisible.paymentDatetime">
+        <el-table-column prop="orderResult" label="支付结果" show-overflow-tooltip sortable v-if="orderListColumnVisible.cost">
+          <template slot-scope="scope">
+            <template v-if="scope.row.orderResult == 'PayWait'">
+              待支付
+            </template>
+            <template v-else-if="scope.row.orderResult == 'PaySucc'">
+               支付成功
+            </template>
+            <template v-else-if="scope.row.orderResult == 'PayFail'">
+               支付失败
+            </template>
+            <template v-else-if="scope.row.orderResult == 'PayClose'">
+               支付订单关闭
+            </template>
+          </template>
         </el-table-column>
-        <el-table-column prop="paymentType" label="支付类型" show-overflow-tooltip sortable v-if="orderListColumnVisible.paymentType">
+        <el-table-column prop="source" label="支付方式" show-overflow-tooltip sortable >
+           <template slot-scope="scope">
+            <template v-if="scope.row.source == '1'">
+              微信支付
+            </template>
+            <template v-else-if="scope.row.source == '2'">
+               余额支付
+            </template>
+            <template v-else-if="scope.row.source == '3'">
+               线下支付
+            </template>
+          </template>
         </el-table-column>
-        <el-table-column prop="paymentName" label="收费名称" show-overflow-tooltip sortable v-if="orderListColumnVisible.paymentName">
+        <el-table-column prop="orderTime" label="下单时间" show-overflow-tooltip sortable v-if="orderListColumnVisible.paymentDatetime">
+          <template slot-scope="scope">
+           <template v-if='scope.row.orderTime'>
+              {{new Date(scope.row.orderTime).toLocaleString()}}
+            </template>
+            <template v-else>
+              - -
+            </template>
+          </template>
+        </el-table-column>
+
+        <!-- <el-table-column prop="paymentName" label="收费名称" show-overflow-tooltip sortable v-if="orderListColumnVisible.paymentName">
         </el-table-column>
         <el-table-column prop="state" label="订单状态" show-overflow-tooltip sortable v-if="orderListColumnVisible.state">
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button type="text">详情</el-button>
+            <template v-if="scope.row.source == 3 && scope.row.orderResult == 'PayWait'">
+              <el-button type="text" @click="validate(scope.row,1)">已收款</el-button>
+              <el-button type="text" @click="validate(scope.row,2)">未收款</el-button>
+
+            </template>
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination :current-page="1" :page-sizes="[100, 200, 300, 400]" :page-size="100" layout="total, sizes, prev, pager, next, jumper" :total="400">
+      <el-pagination :current-page="lens.page" :page-sizes="[100, 200, 300, 400]" :page-size="lens.length" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange" @current-change="handleCurrentChange">
       </el-pagination>
     </el-card>
     <el-dialog top='4vh' :close-on-click-modal=false title="自定义显示列" :visible.sync="orderListColumnDialogVisible">
@@ -113,27 +153,13 @@
     </el-dialog>
   </div>
 </template>
-
 <script>
+import {buyDevice,xxOrderMark} from '@/api/zulin'
 export default {
   data() {
-    const orderList = []
-    for (let i = 0; i < 15; i++) {
-      orderList.push({
-        id: '1015317745706317400',
-        nickname: '测试用户',
-        pos: '测试投放点',
-        deviceMAC: '866854037369637',
-        deviceName: '测试设备',
-        cost: '￥0.01',
-        paymentDatetime: '2018-07-17 04:56:21',
-        paymentType: '微信公众号',
-        paymentName: '1分钱4H',
-        state: '使用中'
-      })
-    }
     return {
-      orderList,
+      sd:'',
+      orderList:[],
       orderListColumnVisible: {
         id: true,
         nickname: true,
@@ -146,8 +172,59 @@ export default {
         paymentName: true,
         state: true
       },
-      orderListColumnDialogVisible: false
+      orderListColumnDialogVisible: false,
+      lens:{
+        length: 100,
+        page: 1
+      },
+      lens1:{
+        length: 10000,
+        page: 1
+      },
+      total:0
     }
+  },
+  created () {
+    this.buyDevice()
+    this.buyDevice1()
+  },
+  methods: {
+    validate(val,ids){
+      let statuses = ''
+      if(ids == 1){
+        statuses = 'PaySucc'
+      }else{
+        statuses = 'PayFail'
+      }
+      console.log(val)
+      xxOrderMark({id:val.id,status:statuses}).then(res=>{
+        if(res.data){
+          this.$message({
+            type: 'success',
+            message: '操作成功!'
+          })
+        }
+        this.buyDevice()
+      })
+    },
+    buyDevice(){
+      buyDevice(this.lens).then(res=>{
+        this.orderList = res.data
+      })
+    },
+    buyDevice1(){
+      buyDevice(this.lens1).then(res=>{
+        this.total = (res.data).length
+      })
+    },
+    handleSizeChange(val) {
+      this.lens.length = val
+      this.buyDevice()
+    },
+    handleCurrentChange(val) {
+      this.lens.page = val
+      this.buyDevice()
+    },
   }
 }
 </script>

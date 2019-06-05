@@ -330,8 +330,8 @@ export default {
     }
   },
   created() {
-    this.getCustomer()
-    this.selectAllTypes()
+    // this.getCustomer()
+    // this.selectAllTypes()
   },
   components: {
     ImageUploader,

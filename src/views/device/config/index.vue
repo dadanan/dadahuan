@@ -3,40 +3,54 @@
     <el-card>
       <div class="table-opts">
         <el-button-group>
-          <el-button type="primary" icon="el-icon-plus" @click="handleDeviceCopy">复制型号</el-button>
-          <el-button type="primary" icon="el-icon-plus" @click="createConfigDialogVisible = true">添加
+          <!-- <el-button type="primary" icon="el-icon-plus" @click="handleDeviceCopy">复制型号</el-button> -->
+          <el-button type="primary" icon="el-icon-plus" @click="addmodel">添加
           </el-button>
         </el-button-group>
       </div>
       <el-table @selection-change="handleSelectionChange" :data="list" v-loading.body="loading" class="mb20" border>
         <el-table-column type="selection"></el-table-column>
         <el-table-column type="index"></el-table-column>
-        <el-table-column prop="modelNo" label="modelNo" show-overflow-tooltip sortable>
+        <el-table-column prop="name" label="型号名称" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="modelCode" label="型号" show-overflow-tooltip sortable>
+        <el-table-column prop="id" label="型号ID" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="name" label="名称" show-overflow-tooltip sortable>
-        </el-table-column>
-        <el-table-column label="缩图">
+        <el-table-column prop="formatNo" label="厂家分类" show-overflow-tooltip sortable>
           <template slot-scope="scope">
-            <img :src="scope.row.icons[0]" class="table-img">
+            <template v-if="scope.row.formatNo == '1'">
+              米子盾
+            </template>
+            <template v-if="scope.row.formatNo == '2'">
+              环可科技
+            </template>
           </template>
         </el-table-column>
-        <el-table-column prop="typeName" label="类型" show-overflow-tooltip sortable>
-        </el-table-column>
-        <el-table-column label="产品二维码">
+        <!-- <el-table-column prop="mdoelNo" label="收费规则" show-overflow-tooltip sortable>
+        </el-table-column> -->
+        <el-table-column label="型号缩图">
           <template slot-scope="scope">
-            <img :src="scope.row.productQrCode" :alt="scope.row.name" class="table-img">
+            <template v-if="scope.row.imgUrl">
+              <img :src="scope.row.imgUrl[0]" class="table-img">
+            </template>
+            <template v-else>
+              暂无缩图
+            </template>
           </template>
         </el-table-column>
-        <el-table-column prop="customerName" label="归属(客户)" show-overflow-tooltip sortable>
+        <el-table-column prop="deviceNum" label="设备数量" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="productId" label="productID" show-overflow-tooltip>
+        <el-table-column prop="createUserName" label="创建人" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="remark" label="备注" show-overflow-tooltip sortable>
+        <el-table-column prop="createTime" label="创建时间" show-overflow-tooltip>
+          <template slot-scope="scope">
+            <!-- {{scope.row.lastUpdateTime}} -->
+            {{new Date(scope.row.createTime).toLocaleString()}}
+        </template>
         </el-table-column>
-        <el-table-column prop="devicePoolCount" label="配额" show-overflow-tooltip sortable>
+        <el-table-column prop="description" label="备注" show-overflow-tooltip sortable>
         </el-table-column>
+        <!-- <el-table-column prop="devicePoolCount" label="配额" show-overflow-tooltip sortable>
+        </el-table-column> -->
         <!-- <el-table-column prop="createUser" label="修改人" show-overflow-tooltip sortable>
         </el-table-column>
         <el-table-column prop="createTime" label="修改时间" show-overflow-tooltip sortable>
@@ -47,76 +61,30 @@
         </el-table-column> -->
         <el-table-column label="操作" show-overflow-tooltip width='180'>
           <template slot-scope="scope">
-            <el-button type="text" @click="createWxDeviceIds(scope.row)">增加配额</el-button>
+            <!-- <el-button type="text" @click="createWxDeviceIds(scope.row)">增加配额</el-button> -->
             <el-button type="text" @click="showEditDialog(scope.row)">编辑</el-button>
             <el-button type="text" @click="deleteRow(scope.row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination :current-page="listQuery.page" :page-sizes="[100,200,300,400]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange" @current-change="handleCurrentChange">
+      <el-pagination :current-page="listQuery.page" :page-sizes="[100,200,300,400]" :page-size="listQuery.length" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange" @current-change="handleCurrentChange">
       </el-pagination>
     </el-card>
     <create-config-dialog :visible.sync="createConfigDialogVisible" :deviceModelData="list" @add-data='addData'></create-config-dialog>
     <edit-config-dialog :data='editingData' @update-data='updateData' :deviceModelData="list" :visible.sync="editConfigDialogVisible"></edit-config-dialog>
-    <el-dialog top='4vh' :close-on-click-modal=false title="自定义显示列" :visible.sync="isClientColumnVisibleDialogVisible">
-      <el-form inline>
-        <el-form-item>
-          <el-checkbox v-model="clientColumnVisible.name">名称</el-checkbox>
-        </el-form-item>
-        <el-form-item>
-          <el-checkbox v-model="clientColumnVisible.type">类别</el-checkbox>
-        </el-form-item>
-        <el-form-item>
-          <el-checkbox v-model="clientColumnVisible.publicName">公众号</el-checkbox>
-        </el-form-item>
-        <el-form-item>
-          <el-checkbox v-model="clientColumnVisible.deviceTypeList">产品类型</el-checkbox>
-        </el-form-item>
-        <el-form-item>
-          <el-checkbox v-model="clientColumnVisible.groupList">组信息</el-checkbox>
-        </el-form-item>
-        <el-form-item>
-          <el-checkbox v-model="clientColumnVisible.administrator">管理员</el-checkbox>
-        </el-form-item>
-        <el-form-item>
-          <el-checkbox v-model="clientColumnVisible.intro">备注说明</el-checkbox>
-        </el-form-item>
-        <el-form-item>
-          <el-checkbox v-model="clientColumnVisible.deviceTotal">客户设备数</el-checkbox>
-        </el-form-item>
-        <el-form-item>
-          <el-checkbox v-model="clientColumnVisible.orderTotal">客户订单数</el-checkbox>
-        </el-form-item>
-        <el-form-item>
-          <el-checkbox v-model="clientColumnVisible.isDashboardEnabled">后台开放与否</el-checkbox>
-        </el-form-item>
-        <el-form-item>
-          <el-checkbox v-model="clientColumnVisible.isAndroidEnabled">安卓开放与否</el-checkbox>
-        </el-form-item>
-        <el-form-item>
-          <el-checkbox v-model="clientColumnVisible.use">业务方向</el-checkbox>
-        </el-form-item>
-      </el-form>
-      <div slot="footer">
-        <el-button @click="isClientColumnVisibleDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="isClientColumnVisibleDialogVisible = false">确定</el-button>
-      </div>
-    </el-dialog>
+    <model-copy-dialog :data='editingData' @update-data='updateData' :deviceModelData="list" :visible.sync="modelCopyDialogVisible"></model-copy-dialog>
   </div>
 </template>
 
 <script>
 import CreateConfigDialog from './components/CreateConfigDialog'
 import EditConfigDialog from './components/EditConfigDialog'
-import {
-  select,
-  selectCount,
-  selectById,
-  deleteModelById,
-  createWxDeviceIds,
-  createDeviceModel
-} from '@/api/device/model'
-import { selectById as selectFormatById } from '@/api/format'
+import ModelCopyDialog from './components/ModelCopyDialog'
+
+import { 
+  deviceModelList,     //查询设备型号配置信息列表
+  deletes
+} from '@/api/zulin'
 
 export default {
   data() {
@@ -126,12 +94,16 @@ export default {
       total: 0,
       listQuery: {
         page: 1,
-        limit: 100,
-        status: 1
+        length: 100,
+      },
+      listQuery1: {
+        page: 1,
+        length: 10000,
       },
       createConfigDialogVisible: false,
       editConfigDialogVisible: false,
       isClientColumnVisibleDialogVisible: false,
+      modelCopyDialogVisible:false,
       clientColumnVisible: {
         name: true,
         type: true,
@@ -152,138 +124,54 @@ export default {
     }
   },
   methods: {
-    createModel(data) {
-      const form = JSON.parse(JSON.stringify(data))
-      // 编辑删除id
-      if (form.deviceModelAbilitys) {
-        form.deviceModelAbilitys.forEach(item => {
-          delete item.id
-          if (!item.deviceModelAbilityOptions) {
-            return
-          }
-          item.deviceModelAbilityOptions.forEach(option => {
-            delete option.id
-          })
-        })
-      }
-
-      if (form.deviceModelFormat) {
-        form.deviceModelFormat.modelFormatPages.forEach(item => {
-          delete item.id
-          delete item.formatId
-          delete item.modelId
-          if (!item.modelFormatItems) {
-            return
-          }
-          item.modelFormatItems.forEach(formatItem => {
-            delete formatItem.id
-            delete formatItem.modelFormatId
-          })
-        })
-      }
-
-      createDeviceModel(form).then(res => {
-        this.addData({
-          ...data,
-          id: res.data
-        })
-
-        const formatId = data.deviceModelFormat.modelFormatPages[0].formatId
-        if (!Number.isInteger(formatId)) {
-          return
-        }
-
-        selectFormatById(formatId).then(response => {
-          if (!Number.isInteger(data.customerId)) {
-            return
-          }
-
-          let url = `${response.data.htmlUrl}?customerId=${data.customerId}`
-          const domain = window.origin.match('://(.*).hcocloud.com')[1]
-          url = url.replace('://pro', '://' + domain)
-
-          this.$alert(
-            `您已成功配置好型号数据，请先保存链接，稍后添加至微信公众号自定义菜单中: ${url}`,
-            '预览地址',
-            {
-              confirmButtonText: '确定'
-            }
-          )
-        })
+    deviceModelAbility() {
+      deviceModelList(this.listQuery).then(res => {
+        this.list = res.data
       })
     },
-    handleDeviceCopy() {
-      if (this.selectedDeviceList.length === 0) {
-        this.$message.warning('请选择设备后再进行操作！')
-        return
-      }
-      if (this.selectedDeviceList.length > 1) {
-        this.$message.warning('只能选择一个设备！')
-        return
-      }
-
-      this.$prompt('请输入型号的ProductID', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputPattern: /^[0-9]*$/,
-        inputErrorMessage: '请输入数字'
+    deviceModelAbility1() {
+      deviceModelList(this.listQuery1).then(res => {
+        this.total = (res.data).length
       })
-        .then(({ value }) => {
-          const number = value.trim()
-          if (!number) {
-            this.$message({
-              type: 'error',
-              message: '请输入型号的ProductID'
-            })
-            return
-          }
-
-          // 查询，创建新的型号
-          selectById(this.selectedDeviceList[0].id).then(res => {
-            const data = res.data
-            data.productId = number
-            delete data.id
-            this.createModel(data)
+    },
+    deleteRow(val){
+      const s = []
+      s.push(val)
+      this.$confirm('将执行删除操作, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+      deletes({idList:s}).then(res=>{
+        if(res.data){
+          this.$emit('update:visible', false)
+          this.$message({
+            message: '型号删除成功！',
+            type: 'success'
           })
-        })
+          this.deviceModelAbility()
+        }
+      })
+      })
         .catch(() => {
           this.$message({
             type: 'info',
-            message: '取消输入'
+            message: '已取消操作'
           })
         })
+    },
+    handleDeviceCopy(){
+      this.modelCopyDialogVisible = true
     },
     handleSelectionChange(selection) {
       this.selectedDeviceList = selection
     },
-    createWxDeviceIds(data) {
-      this.$prompt('请输入数字', 'DeviceID 配额', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputPattern: /\d/,
-        inputErrorMessage: '请输入数字！'
-      })
-        .then(({ value }) => {
-          createWxDeviceIds({
-            customerId: data.customerId,
-            productId: data.productId,
-            addCount: value
-          }).then(() => {
-            this.$message({
-              message: `增加配额数量成功：${value}`,
-              type: 'success'
-            })
-          })
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '取消输入'
-          })
-        })
-    },
     addData(data) {
-      this.list.push(data)
+      // this.list.push(data)
+      this.deviceModelAbility()
+    },
+    addmodel(){
+      this.createConfigDialogVisible = true
     },
     updateData(data) {
       this.list.map(item => {
@@ -293,89 +181,40 @@ export default {
       })
     },
     showEditDialog(data) {
-      this.selectById(data.id)
+      // this.selectById(data.id)
+      this.editConfigDialogVisible = true
+      this.editingData = data
     },
-    deleteRow(id) {
-      this.$confirm('此操作将永久删除该功能, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          deleteModelById(id).then(res => {
-            if (res.code === 200) {
-              this.$message({
-                type: 'success',
-                message: '删除成功!'
-              })
-              // 从表格中移除此条数据
-              this.list = this.list.filter(item => item.id !== id)
-            } else {
-              this.$message({
-                type: 'error',
-                message: res.msg
-              })
-            }
-          })
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          })
-        })
-    },
-    getList() {
-      select(this.listQuery).then(res => {
-        this.list = res.data
-      })
-    },
+
     selectCount() {
       selectCount(this.listQuery.status).then(res => {
         this.total = res.data
       })
     },
-    selectById(id) {
-      selectById(id).then(res => {
-        this.editConfigDialogVisible = true
-        this.editingData = res.data
-      })
-    },
+    // selectById(id) {
+    //   selectById(id).then(res => {
+    //     this.editConfigDialogVisible = true
+    //     this.editingData = res.data
+    //   })
+    // },
     handleSizeChange(val) {
-      this.listQuery.limit = val
-      this.getList()
+      this.listQuery.length = val
+      this.deviceModelAbility1()
     },
     handleCurrentChange(val) {
       this.listQuery.page = val
-      this.getList()
+      this.deviceModelAbility1()
     },
-    deleteFunction() {
-      this.$confirm('此操作将永久删除该功能, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          })
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          })
-        })
-    }
   },
   created() {
-    this.getList()
-    this.selectCount()
+    this.deviceModelAbility()
+    this.deviceModelAbility1()
+    // this.selectCount()
   },
   components: {
     CreateConfigDialog,
-    EditConfigDialog
+    EditConfigDialog,
+    ModelCopyDialog
   }
 }
 </script>

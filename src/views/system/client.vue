@@ -3,7 +3,7 @@
     <el-card>
       <div class="table-opts">
         <el-button-group>
-          <el-button type="primary" @click="isCreateClientDialogVisible = true">添加</el-button>
+          <el-button type="primary">添加</el-button>
           <el-button type="primary" @click="isClientColumnVisibleDialogVisible = true">自定义</el-button>
         </el-button-group>
       </div>
@@ -219,7 +219,7 @@ export default {
     }
   },
   created() {
-    this.getCustomer()
+    // this.getCustomer()
   },
   components: {
     DTitle,

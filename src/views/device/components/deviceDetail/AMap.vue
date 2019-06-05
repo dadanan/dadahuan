@@ -99,6 +99,7 @@ export default {
       })
     },
     onSearchResult(pois) {
+      console.log(pois)
       let latSum = 0
       let lngSum = 0
       if (pois.length > 0) {
@@ -137,7 +138,7 @@ export default {
 
 <style lang='scss' scoped>
 .amap-page-container {
-  height: 500px;
+  height: 440px;
   position: relative;
   .search-box {
     position: absolute;

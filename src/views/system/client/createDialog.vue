@@ -559,8 +559,8 @@ export default {
     }
   },
   created() {
-    this.getList()
-    this.getForamtList()
+    // this.getList()
+    // this.getForamtList()
   },
   components: {
     ImageUploader,

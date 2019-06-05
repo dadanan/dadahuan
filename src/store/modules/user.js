@@ -1,6 +1,7 @@
 import { logout, login } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import store from '../index'
+import { wxKeyLogin } from '@/api/zulins'
 import router from '../../router'
 
 const user = {
@@ -73,10 +74,9 @@ const user = {
              * 所以我前端在成功登陆后自行添加一个token（一般后端会在此时返回一个token）
              * 前端自行模拟也没什么问题（为了解决「2」）
              */
-            data['token'] = 'asdjc12eiajd2asd'
+            // data['token'] = 'asdjc12eiajd2asd'
             commit('SET_TOKEN', data.token)
             setToken(data.token)
-
             // 手动增加权限（这几个页面路由配置有些特殊）
             data.permissions.unshift(
               'big-picture-mode/solution:1:get',
@@ -112,7 +112,60 @@ const user = {
           })
       })
     },
+    // 扫码登录
+    LoginByUsernames({ commit }, userInfo) {
+      // const username = userInfo.username.trim()
+      return new Promise((resolve, reject) => {
+        wxKeyLogin({value:userInfo})
+          .then(response => {
+            console.log(response)
+            const data = response.data
+            /**
+             * 当前后端分离项目使用Token时，Token有两个作用：
+             * 1.添加到请求的header中供后端进行安全校验。
+             * 2.前端自行存储到Cookie or locakStorage中供前端判断用户是否登陆
+             * 又因为此项目后端用的是传统的cookie方案（解决了「1」的问题）。
+             * 所以我前端在成功登陆后自行添加一个token（一般后端会在此时返回一个token）
+             * 前端自行模拟也没什么问题（为了解决「2」）
+             */
+            // data['token'] = 'asdjc12eiajd2asd'
+            commit('SET_TOKEN', data.token)
+            setToken(data.token)
+            // 手动增加权限（这几个页面路由配置有些特殊）
+            data.permissions.unshift(
+              'big-picture-mode/solution:1:get',
+              'big-picture-mode/project:1:get',
+              'big-picture-mode:solution:get',
+              'big-picture-mode:project:get'
+              // 'engineering:means:get',
+              // 'engineering:measure:get',
+              // 'engineering:maintenance:get'
+            )
+            if (data.permissions && data.permissions.length > 0) {
+              // 验证返回的permission是否是一个非空数组
+              commit('SET_PERMISSION', data.permissions)
+            } else {
+              reject('getInfo: permission must be a non-null array !')
+            }
 
+            const user = data.user
+            commit('SET_NAME', user.userName)
+
+            commit('SET_AVATAR', user.avatar)
+            commit('SET_INTRODUCTION', user.introduction)
+
+            store.dispatch('GenerateRoutes', data).then(() => {
+              // 根据permission权限生成可访问的路由表
+              router.addRoutes(store.getters.addRouters) // 动态添加可访问路由表
+              resolve()
+            })
+          })
+          .catch(error => {
+            console.log('err', error)
+            reject(error)
+          })
+      })
+    },
     // 第三方验证登录
     // LoginByThirdparty({ commit, state }, code) {
     //   return new Promise((resolve, reject) => {
@@ -154,6 +207,7 @@ const user = {
 
     // 动态修改权限
     ChangeRoles({ commit }, role) {
+      alert(role)
       return new Promise(resolve => {
         commit('SET_TOKEN', role)
         setToken(role)

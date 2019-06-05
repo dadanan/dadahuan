@@ -1,98 +1,97 @@
 <template>
   <div class="dashboard-container">
-    <!-- <el-row :gutter="20">
-      <el-col :xs="24" :sm="12" :lg="6" v-for="item in kanbanCardList" :key="item.id" v-if="item.isVisible">
-        <data-card :icon="item.icon" :name="item.name" :value="item.value" :unit="item.unit" :style="{ backgroundColor: '#EC7063' }"></data-card>
-      </el-col>
-    </el-row> -->
-    <!-- <el-card class="mb20">
-      <chart :options="kanbanChart" class="chart" auto-resize></chart>
-    </el-card> -->
     <el-card>
       <div class="table-opts">
         <el-form :inline="true" class="el-form--flex">
-          <el-form-item>
-            <el-input placeholder="输入名称" v-model="query.name"></el-input>
-          </el-form-item>
           <!-- <el-form-item>
-            <el-select placeholder="选择关联" v-model="query.linkType">
-              <el-option label="不关联" value="1"></el-option>
-              <el-option label="关联设备" value="2"></el-option>
-              <el-option label="关联工程" value="3"></el-option>
+            <el-input placeholder="输入名称" v-model="query.name"></el-input>
+          </el-form-item> -->
+          <!-- <el-form-item>
+            <el-select placeholder="区域" v-model="query.linkType">
+              <el-option label="上海" value="1"></el-option>
+              <el-option label="北京" value="2"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-select placeholder="业务分类" v-model="query.warnLevel">
+              <el-option label="内部" value="1"></el-option>
+              <el-option label="外部" value="2"></el-option>
             </el-select>
           </el-form-item> -->
           <el-form-item>
-            <el-select placeholder="告警级别" v-model="query.warnLevel">
-              <el-option label="一级告警" value="1"></el-option>
-              <el-option label="二级告警" value="2"></el-option>
-              <el-option label="三级告警" value="3"></el-option>
-            </el-select>
+            <el-input placeholder="设备主名称" v-model="query.name"></el-input>
           </el-form-item>
           <el-form-item>
-            <el-select placeholder="状态" v-model="query.status">
-              <el-option label="禁用" value="3"></el-option>
-              <el-option label="启用" value="1"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" icon="el-icon-search" @click="selectList1">搜索</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="search">搜索</el-button>
             <el-button @click="reset">重置</el-button>
           </el-form-item>
         </el-form>
       </div>
       <div class="table-opts">
         <el-button-group>
-          <el-button type="primary" @click="AddDevice = true">添加</el-button>
-          <el-button type="primary" @click="forbitPlan">禁用</el-button>
-          <el-button type="primary" @click="reversePlan">启用</el-button>
-          <el-button type="primary" @click="deletePlan">删除</el-button>
+          <el-button type="primary" @click="AddDevice= true">添加</el-button>
+          <!-- <el-button type="primary" @click="AddProcess = true">审核</el-button> -->
+          <el-button type="primary" @click="reverseDeve">启用</el-button>
+          <el-button type="primary" @click="forbitRule">禁用</el-button>
+          <el-button type="primary" @click="deleteRule">删除</el-button>
           <!-- <el-button type="primary" @click="isColumnDialogVisible = true">自定义</el-button> -->
         </el-button-group>
       </div>
       <add-device :visible.sync="AddDevice" @add-data='addData'></add-device>
-      <create-device :visible.sync="CreateDevice" :data='editingData' @updata-data='updata'></create-device>
-      <details-device :visible.sync="DetailsDevice" :data='editingData' @updata-data='updata'></details-device>
+      <disable-dev :visible.sync="DisableDev" :data='editingData' @update-data='updateData'></disable-dev>
+      <enable-dev :visible.sync="EnableDev" :data='editingData' @update-data='updateData'></enable-dev>
+      <details-dev :visible.sync="DetailsDev" :data='editingData' @update-data='updateData'></details-dev>
+      <create-device :visible.sync="CreateDevice" :data='editingData' @update-data='updateData'></create-device>
 
-      <el-table :data="alarmList" style="width: 100%" class="mb20" border @selection-change="handleSelectionChange">
+
+      <el-table :data="levelList" style="width: 100%" class="mb20" border @selection-change="handleSelectionChange">
         <el-table-column type="selection"></el-table-column>
         <el-table-column type="index"></el-table-column>
-        <el-table-column prop="name" label="计划名称" show-overflow-tooltip sortable>
+        <el-table-column prop="name" label="投资代号" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="description" label="计划描述" show-overflow-tooltip sortable>
+        <el-table-column prop="franNo" label="加盟商" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="linkType" label="选择关联" show-overflow-tooltip sortable>
+        <el-table-column prop="registerName" label="设备主名称" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="projectTypeName" label="所属系统" show-overflow-tooltip sortable>
+        <el-table-column prop="masterRegisterNo" label="管理帐号" show-overflow-tooltip sortable>
         </el-table-column>
-        <el-table-column prop="ruleName" label="维保项目名称" show-overflow-tooltip sortable>
+        <el-table-column prop="deviceCount" label="设备数量" show-overflow-tooltip sortable>
           <!-- <template slot-scope="scope">
-            <template v-if='scope.row.isRule == 1'>
-              是
-            </template>
-            <template v-else>
-              否
-            </template>
-          </template> -->
-        </el-table-column>
-        <el-table-column prop="warnLevel" label="告警级别" show-overflow-tooltip sortable>
-        </el-table-column>
-        <el-table-column prop="status" label="状态" show-overflow-tooltip sortable>
-        </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" show-overflow-tooltip sortable>
-          <template slot-scope="scope">
             <template>
               {{new Date(scope.row.createTime).toLocaleString()}}
             </template>
+          </template> -->
+        </el-table-column>
+        <el-table-column prop="totalTxnAmt" label="累计营收(元)" show-overflow-tooltip sortable>
+          <template slot-scope="scope">
+            <template v-if="scope.row.totalTxnAmt">
+              {{(scope.row.totalTxnAmt)/100}}
+            </template>
+            <template v-else>
+              - -
+            </template>
           </template>
+        </el-table-column>
+        <el-table-column prop="enable" label="设备主状态" show-overflow-tooltip sortable>
+          <template slot-scope="scope">
+            <template v-if="scope.row.enable == 1">
+              启用
+            </template>
+            <template v-else>
+              禁用
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column prop="description" label="备注信息" show-overflow-tooltip sortable>
         </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button type="text" @click="createDevice(scope.row)">修改</el-button>
-            <el-button type="text" @click="detailsDevice(scope.row)">详情</el-button>
+            <el-button type="text" @click="detailsDev(scope.row)">详情</el-button>
+            <el-button type="text" @click="editorDev(scope.row)">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination :current-page="query.currentPage" :page-sizes="[100, 200, 300, 400]" :page-size="query.limit" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange" @current-change="handleCurrentChange">
+      <el-pagination :current-page="query.page" :page-sizes="[100, 200, 300, 400]" :page-size="query.length" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange" @current-change="handleCurrentChange">
       </el-pagination>
     </el-card>
   </div>
@@ -100,92 +99,121 @@
 
 <script>
 import AddDevice from './components/AddDevice'
+import DisableDev from './components/DisableDev'
+import EnableDev from './components/EnableDev'
+import DetailsDev from './components/DetailsDevice'
 import CreateDevice from './components/CreateDevice'
-import DetailsDevice from './components/DetailsDevice'
 
+import {
+  invest,               //设备主列表
+  indelete,             //删除设备主
+  getInvestInfoDetail,   //设备主详情
+  enableInvest,          //批量启用设备主
+  disableInvest,         //批量禁用设备主
+  getInvestInfoDetails   //设备主详情
+  
+} from '@/api/zulin'
 
-import { selectList1, deletePlan, forbitPlan,reversePlan } from '@/api/alarm'
 export default {
   components: {
     AddDevice,
-    CreateDevice,
-    DetailsDevice
+    DisableDev,
+    EnableDev,
+    DetailsDev,
+    CreateDevice
   },
   data() {
     return {
+      levelList: [{
+        name:111
+      }],
       value1: '',
       value2: '',
       value3: '',
-      alarmList: [],
+      AddDevice: false,
+      DisableDev: false,
+      EnableDev:false,
+      DetailsDev:false,
+      CreateDevice:false,
       query: {
-        limit: 100,
-        currentPage: 1
+        length: 100,
+        page: 1,
+        name:''
+      },
+      query1: {
+        length: 10000,
+        page: 1,
       },
       total: 0,
-      AddDevice: false,
-      CreateDevice: false,
-      DetailsDevice:false,
-      selectedDeviceList: [],
+      editingData: {},
       ids: [],
-      editingData: {}
+      selectedDeviceList: []
     }
   },
+  created() {
+    this.invest()
+    this.invest1()
+
+  },
   methods: {
-    addData(data) {
-      this.alarmList.push(data)
-      this.selectList1()
+    search(){
+      this.invest()
     },
-    updata() {
-      this.selectList1()
+    invest1(){
+      invest(this.query).then(res=>{
+        this.total = (res.data).length
+      })
+    },
+    invest(){
+      invest(this.query).then(res=>{
+        this.levelList = res.data
+      })
+    },
+    editorDev(val){
+      getInvestInfoDetail(val.id).then(res=>{
+        if(res.data){
+          this.editingData = res.data
+          this.CreateDevice = true
+        }
+      })
+      
+    },
+    detailsDev(val){
+      getInvestInfoDetails(val.id).then(res=>{
+        if(res.data){
+          console.log(res.data)
+          this.editingData = res.data
+          this.DetailsDev = true
+        }
+      })
+    },
+    addData(data) {
+      this.invest()
+    },
+    updateData(data) {
+      // this.selectList()
     },
     reset(){
       this.query.name = ''
       this.query.status = ''
       this.query.warnLevel = ''
-      // this.query.linkType = ''
-      this.selectList1()
+      // this.selectList()
     },
-    selectList1() {
-      selectList1(this.query).then(res => {
-        // console.log(res)
-        const list = res.data.planRspPoList
-        const mapList = {
-          '1': '一级告警',
-          '2': '二级告警',
-          '3': '三级告警'
-        }
-        const linkList = {
-          '0': '不关联',
-          '1': '关联设备',
-          '2': '关联工程'
-        }
-        for (var i = 0; i < list.length; i++) {
-          list[i].warnLevel = mapList[list[i].warnLevel]
-          list[i].linkType = linkList[list[i].linkType]
-          if (list[i].status == 1) {
-            list[i].status = '正常'
-          }
-          if (list[i].status == 3) {
-            list[i].status = '禁用'
-          }
-        }
-        this.alarmList = list
-        this.total = res.data.totalCount
-      })
-    },
-    deletePlan() {
+    deleteRule() {
       for (var i = 0; i < this.selectedDeviceList.length; i++) {
         this.ids.push(this.selectedDeviceList[i].id)
+      // console.log(this.selectedDeviceList[i].id)
+
       }
-      deletePlan({ valueList: this.ids }).then(res => {
+      indelete({ idList: this.ids }).then(res => {
         if (res.code === 200) {
-          this.selectedDeviceList = []
-          this.ids =[]
-          this.selectList1()
           this.$message({
             type: 'success',
             message: '删除成功!'
           })
+          this.selectedDeviceList = []
+          this.ids = []
+          this.invest()
         } else {
           this.$message({
             type: 'error',
@@ -194,19 +222,19 @@ export default {
         }
       })
     },
-    forbitPlan() {
+    reverseDeve() {
       for (var i = 0; i < this.selectedDeviceList.length; i++) {
         this.ids.push(this.selectedDeviceList[i].id)
       }
-      forbitPlan({ valueList: this.ids }).then(res => {
+      enableInvest({ value: this.ids }).then(res => {
         if (res.code === 200) {
-          this.selectedDeviceList = []
-          this.ids =[]
-          this.selectList1()
           this.$message({
             type: 'success',
-            message: '禁用成功!'
+            message: '启用成功!'
           })
+          this.selectedDeviceList = []
+          this.ids = []          
+          this.invest()
         } else {
           this.$message({
             type: 'error',
@@ -215,56 +243,39 @@ export default {
         }
       })
     },
-    reversePlan() {
-      for (var i = 0; i < this.selectedDeviceList.length; i++) {
+    forbitRule() {
+      for(var i = 0;i<this.selectedDeviceList.length;i++){
         this.ids.push(this.selectedDeviceList[i].id)
       }
-      reversePlan({ valueList: this.ids }).then(res => {
-        if (res.code === 200) {
+      disableInvest({value:this.ids}).then(res=>{
+        if(res.data){
+          this.$message({
+            message: '禁用成功！',
+            type: 'success'
+          })
+          this.invest()
           this.selectedDeviceList = []
-          this.ids =[]
-          this.selectList1()
-          this.$message({
-            type: 'success',
-            message: '禁用成功!'
-          })
-        } else {
-          this.$message({
-            type: 'error',
-            message: res.msg
-          })
+          this.ids=[]
         }
       })
     },
     handleSizeChange(val) {
       this.query.limit = val
-      this.selectList1()
+      // this.selectList()
     },
     handleCurrentChange(val) {
-      this.query.currentPage = val
-      this.selectList1()
+      this.query.page = val
+      // this.selectList()
     },
-    createDevice(data) {
+    editorProcess(data) {
       this.editingData = data
-      this.CreateDevice = true
-    },
-    detailsDevice(data) {
-      this.editingData = data
-      this.DetailsDevice = true
+      this.EditorProcess = true
     },
     handleSelectionChange(selection) {
       this.selectedDeviceList = selection
+      // console.log(selection)
     }
   },
-  created() {
-    this.selectList1()
-  }
+
 }
 </script>
-
-<style lang="scss" scoped>
-.chart {
-  height: 360px;
-  width: 100%;
-}
-</style>
